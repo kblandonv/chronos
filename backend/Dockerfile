@@ -1,11 +1,15 @@
 FROM python:3.12-slim
 
 WORKDIR /app
+ENV PYTHONPATH=/app
 
-COPY requirements.txt .
+COPY backend/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app ./app
+COPY shared ./shared
+COPY alembic ./alembic
+COPY alembic.ini .
+COPY backend/app ./app
 
 EXPOSE 8000
 

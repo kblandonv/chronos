@@ -16,7 +16,9 @@ Pregrado, Doctorado, y Postgrados y másteres.
 
 ## Estructura del proyecto
 
-```
+```text
+shared/    Modelos de datos (SQLModel), compartidos por backend y scraper
+alembic/   Migraciones de base de datos
 backend/   Aplicación FastAPI
 frontend/  Aplicación React
 scraper/   Scraper con Playwright para el catálogo de asignaturas del SIA
@@ -24,9 +26,27 @@ scraper/   Scraper con Playwright para el catálogo de asignaturas del SIA
 
 ## Estado
 
-Etapa temprana — la navegación del formulario en cascada del scraper ya está
-validada; la API, el esquema de base de datos y el frontend aún no están
-construidos.
+Etapa temprana. Ya funciona de punta a punta para un plan de estudios:
+scraping con Playwright, parseo de asignaturas y grupos/horarios, y
+persistencia en Postgres con el esquema versionado por Alembic. Falta
+recorrer automáticamente todas las facultades/planes, y construir la API y
+el frontend.
+
+## Cómo correrlo
+
+```bash
+cp .env.example .env
+docker compose up -d db
+docker compose run --rm backend alembic upgrade head
+docker compose up backend frontend
+```
+
+Para correr el scraper (apunta a un plan de estudios fijo por ahora, ver
+`scraper/scrape.py`):
+
+```bash
+docker compose --profile scraper run --rm scraper
+```
 
 ## Licencia
 

@@ -1,0 +1,6 @@
+.git
+frontend
+scraper/.venv
+scraper/fixtures
+**/__pycache__
+**/*.pyc
