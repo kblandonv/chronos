@@ -16,6 +16,7 @@ build/
 # Playwright
 scraper/explore_output.json
 scraper/*.png
+scraper/crawl.log
 
 # Env / secrets
 .env
@@ -24,3 +25,6 @@ scraper/*.png
 
 # OS
 .DS_Store
+
+# Secretos sueltos que no van en .env (API keys pegadas en notas, etc.)
+secretos*.txt

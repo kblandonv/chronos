@@ -62,3 +62,23 @@ class GrupoHorario(SQLModel, table=True):
     dia: str
     hora_inicio: datetime.time
     hora_fin: datetime.time
+
+
+class Usuario(SQLModel, table=True):
+    __tablename__ = "usuario"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    auth0_sub: str = Field(unique=True, index=True)
+    email: str
+    nombre: Optional[str] = None
+    created_at: datetime.datetime
+
+
+class UsuarioGrupo(SQLModel, table=True):
+    """A group the user has added to their in-progress schedule."""
+
+    __tablename__ = "usuario_grupo"
+
+    usuario_id: int = Field(foreign_key="usuario.id", primary_key=True)
+    grupo_id: int = Field(foreign_key="grupo.id", primary_key=True)
+    added_at: datetime.datetime

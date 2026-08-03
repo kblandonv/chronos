@@ -3,3 +3,5 @@ uvicorn[standard]
 sqlmodel
 alembic
 psycopg[binary]
+pyjwt[crypto]
+python-dotenv
