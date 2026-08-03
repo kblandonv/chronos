@@ -1,12 +1,12 @@
 # Chronos
 
-A web app to help students at Universidad Nacional de Colombia, Sede Medellín,
-build their class schedule.
+Una aplicación web para ayudar a los estudiantes de la Universidad Nacional de
+Colombia, Sede Medellín, a armar su horario de clases.
 
-The university doesn't expose a public API for course/schedule data, so this
-project includes a scraper that extracts it from the SIA portal (Catálogo de
-Asignaturas), covering all three study levels offered: Pregrado, Doctorado,
-and Postgrados y másteres.
+La universidad no expone una API pública para los datos de cursos/horarios,
+así que este proyecto incluye un scraper que los extrae del portal SIA
+(Catálogo de Asignaturas), cubriendo los tres niveles de estudio ofrecidos:
+Pregrado, Doctorado, y Postgrados y másteres.
 
 ## Stack
 
@@ -14,19 +14,20 @@ and Postgrados y másteres.
 - **Frontend**: React + Vite + TypeScript
 - **Scraper**: Python + Playwright
 
-## Project structure
+## Estructura del proyecto
 
 ```
-backend/   FastAPI application
-frontend/  React application
-scraper/   Playwright-based scraper for the SIA course catalog
+backend/   Aplicación FastAPI
+frontend/  Aplicación React
+scraper/   Scraper con Playwright para el catálogo de asignaturas del SIA
 ```
 
-## Status
+## Estado
 
-Early stage — the scraper's cascading-form navigation is validated; the API,
-database schema, and frontend are not yet built.
+Etapa temprana — la navegación del formulario en cascada del scraper ya está
+validada; la API, el esquema de base de datos y el frontend aún no están
+construidos.
 
-## License
+## Licencia
 
 MIT
