@@ -1,0 +1,26 @@
+# Project instructions for Claude Code (kept local, not published)
+CLAUDE.md
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+build/
+
+# Playwright
+scraper/explore_output.json
+scraper/*.png
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
