@@ -1,0 +1,18 @@
+name: Keep backend alive
+
+# Render's free tier spins the backend down after ~15 minutes of
+# inactivity, so the next real user eats a 20-40s cold start. Ping /health
+# often enough that it never sees that much idle time. GitHub only runs
+# scheduled workflows off the default branch, and timing is best-effort
+# (can slip a few minutes under load), hence the safety margin.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        run: curl -sf --max-time 60 https://api.chronosun.app/health
