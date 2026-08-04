@@ -2,6 +2,12 @@ import type { Asignatura, AsignaturaDetail, Facultad, Grupo, HistoriaAcademica, 
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
 
+// Render's free tier puts the backend to sleep after inactivity -- the
+// first request after that can take 20-40s to wake it up. Long enough to
+// not abort a legitimate cold start, short enough to eventually give up
+// instead of leaving the UI hanging forever on a dead connection.
+const TIMEOUT_MS = 45_000
+
 export class ApiError extends Error {
   status: number
   detail: unknown
@@ -20,7 +26,21 @@ async function request<T>(path: string, token?: string, options: RequestInit = {
   }
   if (token) headers.Authorization = `Bearer ${token}`
 
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers })
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS)
+
+  let res: Response
+  try {
+    res = await fetch(`${API_URL}${path}`, { ...options, headers, signal: controller.signal })
+  } catch (err) {
+    const timedOut = err instanceof DOMException && err.name === "AbortError"
+    throw new ApiError(
+      0,
+      timedOut ? "El servidor tardó demasiado en responder." : "No se pudo conectar con el servidor.",
+    )
+  } finally {
+    clearTimeout(timeoutId)
+  }
 
   if (!res.ok) {
     let body: unknown

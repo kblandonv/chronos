@@ -19,28 +19,37 @@ export default function Perfil() {
   const [planes, setPlanes] = useState<Plan[]>([])
   const [planId, setPlanId] = useState<number | null>(null)
   const [guardando, setGuardando] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const errorGenerico = "No se pudo cargar la información. Revisa tu conexión e intenta de nuevo."
 
   useEffect(() => {
     planesStore
       .listar()
       .then(setMisPlanes)
+      .catch(() => setError(errorGenerico))
       .finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated])
 
   useEffect(() => {
-    api.sedes().then((s) => {
-      setSedes(s)
-      setSede((current) => current || (s.includes("medellin") ? "medellin" : s[0]) || "")
-    })
+    api
+      .sedes()
+      .then((s) => {
+        setSedes(s)
+        setSede((current) => current || (s.includes("medellin") ? "medellin" : s[0]) || "")
+      })
+      .catch(() => setError(errorGenerico))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     setFacultadId(null)
     setPlanes([])
     setPlanId(null)
-    if (sede) api.facultades(nivel, sede).then(setFacultades)
+    if (sede) api.facultades(nivel, sede).then(setFacultades).catch(() => setError(errorGenerico))
     else setFacultades([])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nivel, sede])
 
   useEffect(() => {
@@ -49,25 +58,34 @@ export default function Perfil() {
       setPlanes([])
       return
     }
-    api.planes(facultadId).then(setPlanes)
+    api.planes(facultadId).then(setPlanes).catch(() => setError(errorGenerico))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facultadId])
 
   async function agregarCarrera() {
     const seleccionado = planes.find((p) => p.id === planId)
     if (!seleccionado) return
     setGuardando(true)
+    setError(null)
     try {
       const plan = await planesStore.agregar(seleccionado)
       setMisPlanes((prev) => (prev.some((p) => p.id === plan.id) ? prev : [...prev, plan]))
       setPlanId(null)
+    } catch {
+      setError("No se pudo agregar la carrera, intenta de nuevo.")
     } finally {
       setGuardando(false)
     }
   }
 
   async function quitarCarrera(id: number) {
-    await planesStore.quitar(id)
-    setMisPlanes((prev) => prev.filter((p) => p.id !== id))
+    setError(null)
+    try {
+      await planesStore.quitar(id)
+      setMisPlanes((prev) => prev.filter((p) => p.id !== id))
+    } catch {
+      setError("No se pudo quitar la carrera, intenta de nuevo.")
+    }
   }
 
   return (
@@ -86,6 +104,12 @@ export default function Perfil() {
             Iniciar sesión para guardarlas
           </button>
         </div>
+      )}
+
+      {error && (
+        <p className="mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-400">
+          {error}
+        </p>
       )}
 
       <section className="mt-10">

@@ -5,3 +5,4 @@ alembic
 psycopg[binary]
 pyjwt[crypto]
 python-dotenv
+pytest

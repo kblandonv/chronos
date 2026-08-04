@@ -1,5 +1,6 @@
 import { Auth0Provider } from "@auth0/auth0-react"
 import { BrowserRouter, Route, Routes } from "react-router-dom"
+import Footer from "./components/Footer"
 import NavBar from "./components/NavBar"
 import { useMigrateOnLogin } from "./lib/useMigrateOnLogin"
 import Explorar from "./pages/Explorar"
@@ -28,6 +29,7 @@ function AppShell() {
             <Route path="/historia" element={<HistoriaAcademica />} />
           </Routes>
         </main>
+        <Footer />
       </div>
     </BrowserRouter>
   )

@@ -30,15 +30,27 @@ export default function Explorar() {
   const [resultadosBusqueda, setResultadosBusqueda] = useState<Asignatura[]>([])
   const buscando = busqueda.trim().length >= 2
 
+  const [cargandoSedes, setCargandoSedes] = useState(true)
+  const [errorCatalogo, setErrorCatalogo] = useState<string | null>(null)
+
+  const errorGenerico = "No se pudo cargar la información. Revisa tu conexión e intenta de nuevo."
+
   useEffect(() => {
     if (!buscando) {
       setResultadosBusqueda([])
       return
     }
     const id = setTimeout(() => {
-      api.buscarAsignaturas(busqueda.trim()).then(setResultadosBusqueda)
+      api
+        .buscarAsignaturas(busqueda.trim())
+        .then((r) => {
+          setResultadosBusqueda(r)
+          setErrorCatalogo(null)
+        })
+        .catch(() => setErrorCatalogo(errorGenerico))
     }, 300)
     return () => clearTimeout(id)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [busqueda, buscando])
 
   useEffect(() => {
@@ -47,43 +59,87 @@ export default function Explorar() {
   }, [isAuthenticated])
 
   useEffect(() => {
-    api.sedes().then((s) => {
-      setSedes(s)
-      setSede((current) => current || (s.includes("medellin") ? "medellin" : s[0]) || "")
-    })
+    setCargandoSedes(true)
+    api
+      .sedes()
+      .then((s) => {
+        setSedes(s)
+        setSede((current) => current || (s.includes("medellin") ? "medellin" : s[0]) || "")
+        setErrorCatalogo(null)
+      })
+      .catch(() => setErrorCatalogo(errorGenerico))
+      .finally(() => setCargandoSedes(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     setFacultadId(null)
-    if (sede) api.facultades(nivel, sede).then(setFacultades)
+    if (sede)
+      api
+        .facultades(nivel, sede)
+        .then((f) => {
+          setFacultades(f)
+          setErrorCatalogo(null)
+        })
+        .catch(() => setErrorCatalogo(errorGenerico))
     else setFacultades([])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nivel, sede])
 
   useEffect(() => {
     setPlanId(null)
     setAsignaturas([])
     setSeleccion(null)
-    if (facultadId != null) api.planes(facultadId, nivel).then(setPlanes)
+    if (facultadId != null)
+      api
+        .planes(facultadId, nivel)
+        .then((p) => {
+          setPlanes(p)
+          setErrorCatalogo(null)
+        })
+        .catch(() => setErrorCatalogo(errorGenerico))
     else setPlanes([])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facultadId, nivel])
 
   useEffect(() => {
     setTipologia("")
     setSeleccion(null)
-    if (planId != null) api.tipologias(planId).then(setTipologias)
+    if (planId != null)
+      api
+        .tipologias(planId)
+        .then((t) => {
+          setTipologias(t)
+          setErrorCatalogo(null)
+        })
+        .catch(() => setErrorCatalogo(errorGenerico))
     else setTipologias([])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planId])
 
   useEffect(() => {
     setSeleccion(null)
-    if (planId != null) api.asignaturas(planId, tipologia || undefined).then(setAsignaturas)
+    if (planId != null)
+      api
+        .asignaturas(planId, tipologia || undefined)
+        .then((a) => {
+          setAsignaturas(a)
+          setErrorCatalogo(null)
+        })
+        .catch(() => setErrorCatalogo(errorGenerico))
     else setAsignaturas([])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [planId, tipologia])
 
   const listaAsignaturas = buscando ? resultadosBusqueda : asignaturas
 
   async function verAsignatura(id: number) {
-    setSeleccion(await api.asignatura(id))
+    try {
+      setSeleccion(await api.asignatura(id))
+      setErrorCatalogo(null)
+    } catch {
+      setErrorCatalogo(errorGenerico)
+    }
   }
 
   function conflictoDe(grupo: Grupo): Grupo | null {
@@ -129,6 +185,12 @@ export default function Explorar() {
         {SEDE_LABELS[sede] ?? "Elige una sede"}
       </p>
 
+      {errorCatalogo && (
+        <p className="mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-400">
+          {errorCatalogo}
+        </p>
+      )}
+
       <input
         type="text"
         value={busqueda}
@@ -141,13 +203,18 @@ export default function Explorar() {
         <select
           value={sede}
           onChange={(e) => setSede(e.target.value)}
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+          disabled={cargandoSedes}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900"
         >
-          {sedes.map((s) => (
-            <option key={s} value={s}>
-              {SEDE_LABELS[s] ?? s}
-            </option>
-          ))}
+          {cargandoSedes ? (
+            <option>Cargando sedes...</option>
+          ) : (
+            sedes.map((s) => (
+              <option key={s} value={s}>
+                {SEDE_LABELS[s] ?? s}
+              </option>
+            ))
+          )}
         </select>
         <select
           value={nivel}

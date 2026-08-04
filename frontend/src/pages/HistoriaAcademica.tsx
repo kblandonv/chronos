@@ -19,11 +19,14 @@ export default function HistoriaAcademica() {
   const [loading, setLoading] = useState(true)
   const [procesando, setProcesando] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [errorCarga, setErrorCarga] = useState(false)
 
   useEffect(() => {
+    setErrorCarga(false)
     store
       .obtener()
       .then(setHistoria)
+      .catch(() => setErrorCarga(true))
       .finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated])
@@ -53,6 +56,10 @@ export default function HistoriaAcademica() {
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         Ve a SIA → Información académica → Historia Académica, presiona Ctrl/Cmd+A para
         seleccionar todo, copia, y pégalo aquí abajo. Chronos lo lee y te arma el resumen.
+      </p>
+      <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+        Esto incluye tus notas y tu promedio: solo se usa para calcular lo que ves en esta página y no se
+        comparte con nadie más.
       </p>
 
       {!isAuthenticated && (
@@ -87,6 +94,10 @@ export default function HistoriaAcademica() {
 
       {loading ? (
         <p className="mt-10 text-sm text-slate-500">Cargando...</p>
+      ) : errorCarga ? (
+        <p className="mt-10 text-sm text-red-600 dark:text-red-400">
+          No se pudo cargar tu historia académica guardada. Intenta recargar la página.
+        </p>
       ) : !historia ? (
         <p className="mt-10 text-sm text-slate-500">Todavía no pegaste tu historia académica.</p>
       ) : (

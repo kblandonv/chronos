@@ -47,6 +47,10 @@ jobs:
         working-directory: backend
         run: python -c "from app.main import app"
 
+      - name: Run tests
+        working-directory: backend
+        run: pytest
+
   frontend:
     runs-on: ubuntu-latest
     defaults:
@@ -63,6 +67,7 @@ jobs:
 
       - run: npm ci
       - run: npm run lint
+      - run: npm run test
       - run: npm run build
 
   scraper:

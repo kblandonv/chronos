@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react"
 import WeeklyCalendar from "../components/WeeklyCalendar"
 import { exportToExcel, exportToICS } from "../lib/exportHorario"
 import { useHorarioStore } from "../lib/useHorarioStore"
+import { useIsMobile } from "../lib/useIsMobile"
 import { COLORES_GRUPO, type Grupo } from "../lib/types"
 
 export default function Horario() {
@@ -10,18 +11,25 @@ export default function Horario() {
   const horarioStore = useHorarioStore()
   const [grupos, setGrupos] = useState<Grupo[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     horarioStore
       .listar()
       .then(setGrupos)
+      .catch(() => setError("No se pudo cargar tu horario. Revisa tu conexión e intenta de nuevo."))
       .finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated])
 
   async function quitar(grupoId: number) {
-    await horarioStore.quitar(grupoId)
-    setGrupos((prev) => prev.filter((g) => g.id !== grupoId))
+    try {
+      await horarioStore.quitar(grupoId)
+      setGrupos((prev) => prev.filter((g) => g.id !== grupoId))
+    } catch {
+      setError("No se pudo quitar el grupo, intenta de nuevo.")
+    }
   }
 
   const colorPorGrupo = new Map(grupos.map((g, i) => [g.id, COLORES_GRUPO[i % COLORES_GRUPO.length]]))
@@ -60,6 +68,12 @@ export default function Horario() {
         </div>
       )}
 
+      {error && (
+        <p className="mt-4 rounded-lg bg-red-50 px-4 py-2.5 text-sm text-red-700 dark:bg-red-500/10 dark:text-red-400">
+          {error}
+        </p>
+      )}
+
       {loading ? (
         <p className="mt-6 text-sm text-slate-500">Cargando...</p>
       ) : grupos.length === 0 ? (
@@ -73,7 +87,7 @@ export default function Horario() {
       ) : (
         <>
           <div className="mt-8">
-            <WeeklyCalendar grupos={grupos} />
+            <WeeklyCalendar grupos={grupos} compact={isMobile} />
           </div>
 
           <ul className="mt-10 space-y-2">
