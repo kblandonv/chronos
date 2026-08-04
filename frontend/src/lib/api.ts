@@ -40,7 +40,8 @@ async function request<T>(path: string, token?: string, options: RequestInit = {
 export const api = {
   niveles: () => request<string[]>("/catalogo/niveles"),
   facultades: (nivel?: string) => request<Facultad[]>(`/catalogo/facultades${nivel ? `?nivel=${nivel}` : ""}`),
-  planes: (facultadId: number) => request<Plan[]>(`/catalogo/facultades/${facultadId}/planes`),
+  planes: (facultadId: number, nivel?: string) =>
+    request<Plan[]>(`/catalogo/facultades/${facultadId}/planes${nivel ? `?nivel=${nivel}` : ""}`),
   tipologias: (planId: number) => request<string[]>(`/catalogo/planes/${planId}/tipologias`),
   asignaturas: (planId: number, tipologia?: string) =>
     request<Asignatura[]>(

@@ -1,6 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func
 from sqlmodel import Session, select
 
 from app.db import get_session
@@ -39,8 +40,11 @@ def list_facultades(nivel: Optional[str] = None, session: Session = Depends(get_
 
 
 @router.get("/facultades/{facultad_id}/planes", response_model=list[PlanRead])
-def list_planes(facultad_id: int, session: Session = Depends(get_session)):
-    return session.exec(select(PlanEstudios).where(PlanEstudios.facultad_id == facultad_id)).all()
+def list_planes(facultad_id: int, nivel: Optional[str] = None, session: Session = Depends(get_session)):
+    query = select(PlanEstudios).where(PlanEstudios.facultad_id == facultad_id)
+    if nivel:
+        query = query.where(PlanEstudios.nivel == nivel)
+    return session.exec(query).all()
 
 
 @router.get("/planes/{plan_id}/tipologias", response_model=list[str])
@@ -68,7 +72,12 @@ def list_asignaturas(plan_id: int, tipologia: Optional[str] = None, session: Ses
 
 @router.get("/asignaturas", response_model=list[AsignaturaRead])
 def search_asignaturas(q: str = Query(..., min_length=2), session: Session = Depends(get_session)):
-    return session.exec(select(Asignatura).where(Asignatura.nombre.ilike(f"%{q}%"))).all()
+    # unaccent so a search without tildes (the common case) still matches
+    # names that have them, e.g. "calculo" -> "CÁLCULO".
+    query = select(Asignatura).where(
+        func.unaccent(Asignatura.nombre).ilike(func.unaccent(f"%{q}%"))
+    )
+    return session.exec(query).all()
 
 
 @router.get("/asignaturas/{asignatura_id}", response_model=AsignaturaDetailRead)

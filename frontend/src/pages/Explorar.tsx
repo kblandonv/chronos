@@ -19,6 +19,21 @@ export default function Explorar() {
   const [seleccion, setSeleccion] = useState<AsignaturaDetail | null>(null)
   const [mensaje, setMensaje] = useState<string | null>(null)
 
+  const [busqueda, setBusqueda] = useState("")
+  const [resultadosBusqueda, setResultadosBusqueda] = useState<Asignatura[]>([])
+  const buscando = busqueda.trim().length >= 2
+
+  useEffect(() => {
+    if (!buscando) {
+      setResultadosBusqueda([])
+      return
+    }
+    const id = setTimeout(() => {
+      api.buscarAsignaturas(busqueda.trim()).then(setResultadosBusqueda)
+    }, 300)
+    return () => clearTimeout(id)
+  }, [busqueda, buscando])
+
   useEffect(() => {
     setFacultadId(null)
     api.facultades(nivel).then(setFacultades)
@@ -28,9 +43,9 @@ export default function Explorar() {
     setPlanId(null)
     setAsignaturas([])
     setSeleccion(null)
-    if (facultadId != null) api.planes(facultadId).then(setPlanes)
+    if (facultadId != null) api.planes(facultadId, nivel).then(setPlanes)
     else setPlanes([])
-  }, [facultadId])
+  }, [facultadId, nivel])
 
   useEffect(() => {
     setTipologia("")
@@ -44,6 +59,8 @@ export default function Explorar() {
     if (planId != null) api.asignaturas(planId, tipologia || undefined).then(setAsignaturas)
     else setAsignaturas([])
   }, [planId, tipologia])
+
+  const listaAsignaturas = buscando ? resultadosBusqueda : asignaturas
 
   async function verAsignatura(id: number) {
     setSeleccion(await api.asignatura(id))
@@ -75,7 +92,15 @@ export default function Explorar() {
       <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Explorar asignaturas</h1>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sede Medellín</p>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <input
+        type="text"
+        value={busqueda}
+        onChange={(e) => setBusqueda(e.target.value)}
+        placeholder="Buscar asignatura por nombre..."
+        className="mt-6 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:placeholder:text-slate-500"
+      />
+
+      <div className={`mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 ${buscando ? "opacity-50" : ""}`}>
         <select
           value={nivel}
           onChange={(e) => setNivel(e.target.value)}
@@ -129,16 +154,20 @@ export default function Explorar() {
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div>
-          <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-slate-500">Asignaturas</h2>
-          {asignaturas.length === 0 ? (
+          <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-slate-500">
+            {buscando ? `Resultados para "${busqueda.trim()}"` : "Asignaturas"}
+          </h2>
+          {listaAsignaturas.length === 0 ? (
             <p className="text-sm text-slate-500">
-              {planId == null
-                ? "Elige facultad y plan para ver las asignaturas."
-                : "No hay asignaturas de este tipo en el plan seleccionado."}
+              {buscando
+                ? "No encontramos asignaturas con ese nombre."
+                : planId == null
+                  ? "Elige facultad y plan para ver las asignaturas, o busca por nombre arriba."
+                  : "No hay asignaturas de este tipo en el plan seleccionado."}
             </p>
           ) : (
             <ul className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
-              {asignaturas.map((a) => (
+              {listaAsignaturas.map((a) => (
                 <li key={a.id}>
                   <button
                     onClick={() => verAsignatura(a.id)}
