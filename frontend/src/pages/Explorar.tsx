@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
+import WeeklyCalendar from "../components/WeeklyCalendar"
 import { ApiError, api } from "../lib/api"
+import { seCruzan } from "../lib/localStore"
 import { useHorarioStore } from "../lib/useHorarioStore"
 import { NIVELES, NIVEL_LABELS, SEDE_LABELS, type Asignatura, type AsignaturaDetail, type Facultad, type Grupo, type Plan } from "../lib/types"
 
 export default function Explorar() {
   const { isAuthenticated } = useAuth0()
   const horarioStore = useHorarioStore()
+
+  const [miHorario, setMiHorario] = useState<Grupo[]>([])
+  const [preview, setPreview] = useState<Grupo | null>(null)
 
   const [sedes, setSedes] = useState<string[]>([])
   const [sede, setSede] = useState<string>("")
@@ -35,6 +40,11 @@ export default function Explorar() {
     }, 300)
     return () => clearTimeout(id)
   }, [busqueda, buscando])
+
+  useEffect(() => {
+    horarioStore.listar().then(setMiHorario)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated])
 
   useEffect(() => {
     api.sedes().then((s) => {
@@ -76,10 +86,19 @@ export default function Explorar() {
     setSeleccion(await api.asignatura(id))
   }
 
+  function conflictoDe(grupo: Grupo): Grupo | null {
+    return miHorario.find((mg) => mg.id !== grupo.id && seCruzan(mg, grupo)) ?? null
+  }
+
+  function yaAgregado(grupo: Grupo): boolean {
+    return miHorario.some((mg) => mg.id === grupo.id)
+  }
+
   async function agregar(grupo: Grupo) {
     setMensaje(null)
     try {
       await horarioStore.agregar(grupo)
+      setMiHorario((prev) => (prev.some((g) => g.id === grupo.id) ? prev : [...prev, grupo]))
       setMensaje(
         isAuthenticated
           ? "Grupo agregado a tu horario."
@@ -98,7 +117,7 @@ export default function Explorar() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
+    <div className="mx-auto w-full max-w-[1600px] px-6 py-12">
       <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Explorar asignaturas</h1>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
         {SEDE_LABELS[sede] ?? "Elige una sede"}
@@ -175,7 +194,7 @@ export default function Explorar() {
         </select>
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-2">
+      <div className="mt-8 grid gap-8 lg:grid-cols-2 xl:grid-cols-[1fr_1fr_1.3fr]">
         <div>
           <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-slate-500">
             {buscando ? `Resultados para "${busqueda.trim()}"` : "Asignaturas"}
@@ -224,32 +243,60 @@ export default function Explorar() {
             <p className="text-sm text-slate-500">Esta asignatura no tiene grupos abiertos ahora mismo.</p>
           ) : (
             <ul className="max-h-[32rem] space-y-3 overflow-y-auto pr-1">
-              {seleccion.grupos.map((g) => (
-                <li key={g.id} className="rounded-xl border border-slate-200 p-4 text-sm dark:border-slate-800">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="font-medium text-slate-900 dark:text-white">Grupo {g.numero}</p>
-                      <p className="text-slate-500">{g.profesor ?? "Sin profesor asignado"}</p>
-                      <ul className="mt-2 space-y-1 text-xs text-slate-500">
-                        {g.horarios.map((h, i) => (
-                          <li key={i}>
-                            {h.dia} {h.hora_inicio.slice(0, 5)} - {h.hora_fin.slice(0, 5)}
-                            {h.aula && ` · ${h.aula}`}
-                          </li>
-                        ))}
-                      </ul>
-                      <p className="mt-2 text-xs text-slate-400">Cupos: {g.cupos_disponibles ?? "?"}</p>
+              {seleccion.grupos.map((g) => {
+                const conflicto = conflictoDe(g)
+                const agregado = yaAgregado(g)
+                return (
+                  <li
+                    key={g.id}
+                    className="rounded-xl border border-slate-200 p-4 text-sm dark:border-slate-800"
+                    onMouseEnter={() => setPreview(g)}
+                    onMouseLeave={() => setPreview((p) => (p?.id === g.id ? null : p))}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-slate-900 dark:text-white">Grupo {g.numero}</p>
+                        <p className="text-slate-500">{g.profesor ?? "Sin profesor asignado"}</p>
+                        <ul className="mt-2 space-y-1 text-xs text-slate-500">
+                          {g.horarios.map((h, i) => (
+                            <li key={i}>
+                              {h.dia} {h.hora_inicio.slice(0, 5)} - {h.hora_fin.slice(0, 5)}
+                              {h.aula && ` · ${h.aula}`}
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="mt-2 text-xs text-slate-400">Cupos: {g.cupos_disponibles ?? "?"}</p>
+                        {conflicto && !agregado && (
+                          <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                            Cruza con {conflicto.asignatura_nombre ?? "otra asignatura"} (Grupo {conflicto.numero})
+                          </p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => agregar(g)}
+                        disabled={agregado || !!conflicto}
+                        className="shrink-0 rounded-full bg-violet-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+                      >
+                        {agregado ? "Ya agregado" : conflicto ? "Cruza horario" : "Agregar"}
+                      </button>
                     </div>
-                    <button
-                      onClick={() => agregar(g)}
-                      className="shrink-0 rounded-full bg-violet-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-violet-500"
-                    >
-                      Agregar
-                    </button>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                )
+              })}
             </ul>
+          )}
+        </div>
+
+        <div>
+          <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-slate-500">
+            Mi horario {preview && <span className="text-violet-500">(vista previa)</span>}
+          </h2>
+          {miHorario.length === 0 && !preview ? (
+            <p className="text-sm text-slate-500">
+              Todavía no tienes nada agregado. A medida que agregues grupos, los vas viendo acá.
+            </p>
+          ) : (
+            <WeeklyCalendar grupos={miHorario} preview={preview} compact />
           )}
         </div>
       </div>

@@ -1,25 +1,9 @@
 import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
+import WeeklyCalendar from "../components/WeeklyCalendar"
 import { exportToExcel, exportToICS } from "../lib/exportHorario"
 import { useHorarioStore } from "../lib/useHorarioStore"
-import { DIAS, DIA_LABELS, type Grupo } from "../lib/types"
-
-const HORA_INICIO = 6
-const HORA_FIN = 22
-const PX_POR_HORA = 56
-
-const COLORES = [
-  "bg-violet-100 border-violet-300 text-violet-900 dark:bg-violet-500/20 dark:border-violet-500/40 dark:text-violet-100",
-  "bg-sky-100 border-sky-300 text-sky-900 dark:bg-sky-500/20 dark:border-sky-500/40 dark:text-sky-100",
-  "bg-emerald-100 border-emerald-300 text-emerald-900 dark:bg-emerald-500/20 dark:border-emerald-500/40 dark:text-emerald-100",
-  "bg-amber-100 border-amber-300 text-amber-900 dark:bg-amber-500/20 dark:border-amber-500/40 dark:text-amber-100",
-  "bg-rose-100 border-rose-300 text-rose-900 dark:bg-rose-500/20 dark:border-rose-500/40 dark:text-rose-100",
-]
-
-function minutosDesdeInicio(hora: string) {
-  const [h, m] = hora.split(":").map(Number)
-  return (h - HORA_INICIO) * 60 + m
-}
+import { COLORES_GRUPO, type Grupo } from "../lib/types"
 
 export default function Horario() {
   const { isAuthenticated, loginWithRedirect } = useAuth0()
@@ -40,11 +24,7 @@ export default function Horario() {
     setGrupos((prev) => prev.filter((g) => g.id !== grupoId))
   }
 
-  const horas = Array.from({ length: HORA_FIN - HORA_INICIO }, (_, i) => HORA_INICIO + i)
-  const diasVisibles = DIAS.filter(
-    (d) => d !== "DOMINGO" && d !== "SABADO" ? true : grupos.some((g) => g.horarios.some((h) => h.dia === d)),
-  )
-  const colorPorGrupo = new Map(grupos.map((g, i) => [g.id, COLORES[i % COLORES.length]]))
+  const colorPorGrupo = new Map(grupos.map((g, i) => [g.id, COLORES_GRUPO[i % COLORES_GRUPO.length]]))
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
@@ -92,72 +72,8 @@ export default function Horario() {
         </p>
       ) : (
         <>
-          <div className="mt-8 overflow-x-auto">
-            <div
-              className="grid min-w-[720px]"
-              style={{ gridTemplateColumns: `52px repeat(${diasVisibles.length}, 1fr)` }}
-            >
-              <div />
-              {diasVisibles.map((d) => (
-                <div
-                  key={d}
-                  className="px-2 pb-2 text-center text-sm font-medium text-slate-700 dark:text-slate-300"
-                >
-                  {DIA_LABELS[d]}
-                </div>
-              ))}
-
-              <div className="relative" style={{ height: (HORA_FIN - HORA_INICIO) * PX_POR_HORA }}>
-                {horas.map((h) => (
-                  <div
-                    key={h}
-                    className="absolute right-2 -translate-y-1/2 text-xs text-slate-400"
-                    style={{ top: (h - HORA_INICIO) * PX_POR_HORA }}
-                  >
-                    {h}:00
-                  </div>
-                ))}
-              </div>
-
-              {diasVisibles.map((dia) => (
-                <div
-                  key={dia}
-                  className="relative border-l border-slate-200 dark:border-slate-800"
-                  style={{ height: (HORA_FIN - HORA_INICIO) * PX_POR_HORA }}
-                >
-                  {horas.map((h) => (
-                    <div
-                      key={h}
-                      className="absolute inset-x-0 border-t border-slate-100 dark:border-slate-900"
-                      style={{ top: (h - HORA_INICIO) * PX_POR_HORA }}
-                    />
-                  ))}
-                  {grupos.flatMap((g) =>
-                    g.horarios
-                      .filter((h) => h.dia === dia)
-                      .map((h, hi) => {
-                        const top = minutosDesdeInicio(h.hora_inicio) * (PX_POR_HORA / 60)
-                        const height =
-                          (minutosDesdeInicio(h.hora_fin) - minutosDesdeInicio(h.hora_inicio)) *
-                          (PX_POR_HORA / 60)
-                        return (
-                          <div
-                            key={`${g.id}-${hi}`}
-                            className={`absolute inset-x-1 overflow-hidden rounded-lg border p-1.5 text-[11px] leading-tight ${colorPorGrupo.get(g.id)}`}
-                            style={{ top, height: Math.max(height, 56) }}
-                          >
-                            <p className="truncate font-semibold">{g.asignatura_nombre ?? "Asignatura"}</p>
-                            <p className="truncate">Grupo {g.numero}</p>
-                            <p className="truncate">{g.profesor ?? "Sin profesor"}</p>
-                            <p className="truncate">Cupos: {g.cupos_disponibles ?? "?"}</p>
-                            {h.aula && <p className="truncate">{h.aula}</p>}
-                          </div>
-                        )
-                      }),
-                  )}
-                </div>
-              ))}
-            </div>
+          <div className="mt-8">
+            <WeeklyCalendar grupos={grupos} />
           </div>
 
           <ul className="mt-10 space-y-2">
