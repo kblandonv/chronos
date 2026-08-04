@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
-import { useApi } from "../lib/useApi"
+import { useAuth0 } from "@auth0/auth0-react"
+import { useHorarioStore } from "../lib/useHorarioStore"
 import type { Grupo } from "../lib/types"
 
 const DIAS = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"]
@@ -30,20 +31,21 @@ function minutosDesdeInicio(hora: string) {
 }
 
 export default function Horario() {
-  const apiMe = useApi()
+  const { isAuthenticated, loginWithRedirect } = useAuth0()
+  const horarioStore = useHorarioStore()
   const [grupos, setGrupos] = useState<Grupo[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    apiMe
-      .horario()
+    horarioStore
+      .listar()
       .then(setGrupos)
       .finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isAuthenticated])
 
   async function quitar(grupoId: number) {
-    await apiMe.quitarGrupo(grupoId)
+    await horarioStore.quitar(grupoId)
     setGrupos((prev) => prev.filter((g) => g.id !== grupoId))
   }
 
@@ -56,6 +58,18 @@ export default function Horario() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Mi horario</h1>
+
+      {!isAuthenticated && (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+          <span>Estás sin cuenta: este horario se guarda solo en este navegador.</span>
+          <button
+            onClick={() => loginWithRedirect()}
+            className="shrink-0 rounded-full bg-amber-600 px-3 py-1 text-xs font-medium text-white hover:bg-amber-500"
+          >
+            Iniciar sesión para guardarlo
+          </button>
+        </div>
+      )}
 
       {loading ? (
         <p className="mt-6 text-sm text-slate-500">Cargando...</p>

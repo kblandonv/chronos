@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import { ApiError, api } from "../lib/api"
-import { useApi } from "../lib/useApi"
-import { NIVELES, NIVEL_LABELS, type Asignatura, type AsignaturaDetail, type Facultad, type Plan } from "../lib/types"
+import { useHorarioStore } from "../lib/useHorarioStore"
+import { NIVELES, NIVEL_LABELS, type Asignatura, type AsignaturaDetail, type Facultad, type Grupo, type Plan } from "../lib/types"
 
 export default function Explorar() {
-  const { isAuthenticated, loginWithRedirect } = useAuth0()
-  const apiMe = useApi()
+  const { isAuthenticated } = useAuth0()
+  const horarioStore = useHorarioStore()
 
   const [nivel, setNivel] = useState<string>(NIVELES[0])
   const [facultades, setFacultades] = useState<Facultad[]>([])
@@ -40,15 +40,15 @@ export default function Explorar() {
     setSeleccion(await api.asignatura(id))
   }
 
-  async function agregar(grupoId: number) {
-    if (!isAuthenticated) {
-      loginWithRedirect()
-      return
-    }
+  async function agregar(grupo: Grupo) {
     setMensaje(null)
     try {
-      await apiMe.agregarGrupo(grupoId)
-      setMensaje("Grupo agregado a tu horario.")
+      await horarioStore.agregar(grupo)
+      setMensaje(
+        isAuthenticated
+          ? "Grupo agregado a tu horario."
+          : "Grupo agregado a tu horario (guardado en este navegador — iniciá sesión para no perderlo).",
+      )
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         const detail = err.detail as { message?: string }
@@ -162,7 +162,7 @@ export default function Explorar() {
                       <p className="mt-2 text-xs text-slate-400">Cupos: {g.cupos_disponibles ?? "?"}</p>
                     </div>
                     <button
-                      onClick={() => agregar(g.id)}
+                      onClick={() => agregar(g)}
                       className="shrink-0 rounded-full bg-violet-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-violet-500"
                     >
                       Agregar

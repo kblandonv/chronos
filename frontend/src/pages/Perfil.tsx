@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import { api } from "../lib/api"
-import { useApi } from "../lib/useApi"
+import { usePlanesStore } from "../lib/usePlanesStore"
 import { NIVELES, NIVEL_LABELS, type Facultad, type Plan } from "../lib/types"
 
 export default function Perfil() {
-  const { user } = useAuth0()
-  const apiMe = useApi()
+  const { user, isAuthenticated, loginWithRedirect } = useAuth0()
+  const planesStore = usePlanesStore()
 
   const [misPlanes, setMisPlanes] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
@@ -19,12 +19,12 @@ export default function Perfil() {
   const [guardando, setGuardando] = useState(false)
 
   useEffect(() => {
-    apiMe
-      .misPlanes()
+    planesStore
+      .listar()
       .then(setMisPlanes)
       .finally(() => setLoading(false))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [isAuthenticated])
 
   useEffect(() => {
     setFacultadId(null)
@@ -43,10 +43,11 @@ export default function Perfil() {
   }, [facultadId])
 
   async function agregarCarrera() {
-    if (planId == null) return
+    const seleccionado = planes.find((p) => p.id === planId)
+    if (!seleccionado) return
     setGuardando(true)
     try {
-      const plan = await apiMe.agregarPlan(planId)
+      const plan = await planesStore.agregar(seleccionado)
       setMisPlanes((prev) => (prev.some((p) => p.id === plan.id) ? prev : [...prev, plan]))
       setPlanId(null)
     } finally {
@@ -55,14 +56,27 @@ export default function Perfil() {
   }
 
   async function quitarCarrera(id: number) {
-    await apiMe.quitarPlan(id)
+    await planesStore.quitar(id)
     setMisPlanes((prev) => prev.filter((p) => p.id !== id))
   }
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-12">
       <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Mi perfil</h1>
-      <p className="mt-1 text-slate-600 dark:text-slate-400">{user?.email}</p>
+
+      {isAuthenticated ? (
+        <p className="mt-1 text-slate-600 dark:text-slate-400">{user?.email}</p>
+      ) : (
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+          <span>Estás sin cuenta: tus carreras se guardan solo en este navegador.</span>
+          <button
+            onClick={() => loginWithRedirect()}
+            className="shrink-0 rounded-full bg-amber-600 px-3 py-1 text-xs font-medium text-white hover:bg-amber-500"
+          >
+            Iniciar sesión para guardarlas
+          </button>
+        </div>
+      )}
 
       <section className="mt-10">
         <h2 className="text-lg font-medium text-slate-900 dark:text-white">Mis carreras</h2>

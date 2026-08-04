@@ -17,16 +17,12 @@ export default function NavBar() {
           <Link to="/explorar" className={linkClass}>
             Explorar
           </Link>
-          {isAuthenticated && (
-            <>
-              <Link to="/horario" className={linkClass}>
-                Mi horario
-              </Link>
-              <Link to="/perfil" className={linkClass}>
-                Mi perfil
-              </Link>
-            </>
-          )}
+          <Link to="/horario" className={linkClass}>
+            Mi horario
+          </Link>
+          <Link to="/perfil" className={linkClass}>
+            Mi perfil
+          </Link>
           {!isLoading &&
             (isAuthenticated ? (
               <button
