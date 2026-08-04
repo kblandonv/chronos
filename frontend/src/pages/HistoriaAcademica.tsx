@@ -36,7 +36,7 @@ export default function HistoriaAcademica() {
       setHistoria(parsed)
       setTexto("")
     } catch {
-      setError("No se pudo leer el texto pegado. Asegurate de copiar toda la página de Historia Académica.")
+      setError("No se pudo leer el texto pegado. Asegúrate de copiar toda la página de Historia Académica.")
     } finally {
       setProcesando(false)
     }
@@ -50,8 +50,8 @@ export default function HistoriaAcademica() {
     <div className="mx-auto max-w-4xl px-6 py-12">
       <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Mi historia académica</h1>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        Andá a SIA → Información académica → Historia Académica, hacé Ctrl/Cmd+A para seleccionar
-        todo, copiá, y pegalo acá abajo. Chronos lo lee y te arma el resumen.
+        Ve a SIA → Información académica → Historia Académica, presiona Ctrl/Cmd+A para
+        seleccionar todo, copia, y pégalo aquí abajo. Chronos lo lee y te arma el resumen.
       </p>
 
       {!isAuthenticated && (
@@ -70,7 +70,7 @@ export default function HistoriaAcademica() {
         <textarea
           value={texto}
           onChange={(e) => setTexto(e.target.value)}
-          placeholder="Pegá acá el contenido de la página Historia Académica del SIA..."
+          placeholder="Pega aquí el contenido de la página Historia Académica del SIA..."
           rows={6}
           className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
         />

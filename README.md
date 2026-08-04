@@ -8,29 +8,41 @@ así que este proyecto incluye un scraper que los extrae del portal SIA
 (Catálogo de Asignaturas), cubriendo los tres niveles de estudio ofrecidos:
 Pregrado, Doctorado, y Postgrados y másteres.
 
+**Este es un proyecto de código abierto y se aceptan contribuciones.** Si
+quieres ayudar, revisa la sección [Contribuir](#contribuir) más abajo.
+
+## Funcionalidades
+
+- **Explorar el catálogo**: nivel de estudio → facultad → plan de estudios →
+  asignaturas → grupos (horario, profesor, cupos).
+- **Armar tu horario**: agrega grupos y Chronos avisa si hay cruce de
+  horario con algo que ya tengas.
+- **Mi perfil**: guarda el/los plan(es) de estudio en los que estás
+  (pregrado, posgrado, o ambos), distinguiendo el plan nuevo del viejo
+  cuando el programa tiene los dos.
+- **Mi historia académica**: pega el contenido de tu Historia Académica del
+  SIA (Select All + copiar) y Chronos te muestra tu avance, promedio,
+  P.A.P.A y créditos por tipología, con un gráfico de progreso.
+- **Registro opcional**: toda la app funciona sin cuenta (los datos quedan
+  en tu navegador). Iniciar sesión con Auth0 es solo para no perderlos y
+  tenerlos en cualquier dispositivo.
+
 ## Stack
 
-- **Backend**: FastAPI + PostgreSQL
-- **Frontend**: React + Vite + TypeScript
+- **Backend**: FastAPI + PostgreSQL + Alembic
+- **Frontend**: React + Vite + TypeScript + Tailwind CSS + Auth0
 - **Scraper**: Python + Playwright
 
 ## Estructura del proyecto
 
 ```text
-shared/    Modelos de datos (SQLModel), compartidos por backend y scraper
-alembic/   Migraciones de base de datos
-backend/   Aplicación FastAPI
-frontend/  Aplicación React
-scraper/   Scraper con Playwright para el catálogo de asignaturas del SIA
+shared/              Modelos de datos (SQLModel), compartidos por backend y scraper
+alembic/             Migraciones de base de datos
+backend/             Aplicación FastAPI
+frontend/            Aplicación React
+scraper/             Scraper con Playwright para el catálogo de asignaturas del SIA
+.github/workflows/   CI (GitHub Actions)
 ```
-
-## Estado
-
-Etapa temprana. Ya funciona de punta a punta para un plan de estudios:
-scraping con Playwright, parseo de asignaturas y grupos/horarios, y
-persistencia en Postgres con el esquema versionado por Alembic. Falta
-recorrer automáticamente todas las facultades/planes, y construir la API y
-el frontend.
 
 ## Cómo correrlo
 
@@ -41,13 +53,28 @@ docker compose run --rm backend alembic upgrade head
 docker compose up backend frontend
 ```
 
-Para correr el scraper (apunta a un plan de estudios fijo por ahora, ver
-`scraper/scrape.py`):
+Para correr el scraper completo (recorre todas las facultades y planes de
+las tres niveles de estudio; ver `scraper/crawl.py`):
 
 ```bash
 docker compose --profile scraper run --rm scraper
 ```
 
+El login usa Auth0 — necesitas tu propio tenant configurado (ver
+`CLAUDE.md` para los detalles de configuración si estás desarrollando
+localmente).
+
+## Contribuir
+
+Las contribuciones son bienvenidas: reportar bugs, proponer mejoras, o
+mandar un pull request directamente. Todavía no hay una guía formal de
+contribución, así que por ahora:
+
+1. Abre un issue si encuentras un bug o quieres proponer un cambio grande
+   antes de ponerte a programar.
+2. Para cambios chicos, un pull request directo está bien.
+3. El proyecto vive en la rama `dev`; los PRs deberían apuntar ahí.
+
 ## Licencia
 
-MIT
+MIT — libre para usar, modificar y distribuir.

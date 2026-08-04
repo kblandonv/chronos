@@ -9,11 +9,11 @@ const FEATURES = [
   },
   {
     title: "Cruces de horario",
-    body: "Al agregar un grupo, Chronos avisa si choca con algo que ya tenés en tu horario.",
+    body: "Al agregar un grupo, Chronos avisa si choca con algo que ya tienes en tu horario.",
   },
   {
     title: "Tu perfil, tu carrera",
-    body: "Configurá tu(s) plan(es) de estudio -- pregrado, posgrado, o ambos -- y el plan nuevo o el viejo.",
+    body: "Configura tu(s) plan(es) de estudio -- pregrado, posgrado, o ambos -- y el plan nuevo o el viejo.",
   },
 ]
 
@@ -32,8 +32,8 @@ export default function Landing() {
             Arma tu horario sin dolores de cabeza
           </h1>
           <p className="mt-6 max-w-2xl text-lg text-slate-600 dark:text-slate-300">
-            Chronos junta todo el catálogo de asignaturas del SIA en un solo lugar: elegí tu
-            facultad, tu plan de estudios, y armá tu semestre viendo los cruces de horario antes de
+            Chronos junta todo el catálogo de asignaturas del SIA en un solo lugar: elige tu
+            facultad, tu plan de estudios, y arma tu semestre viendo los cruces de horario antes de
             matricular.
           </p>
           <div className="mt-10 flex flex-wrap items-center justify-center gap-4">

@@ -47,16 +47,16 @@ export default function Explorar() {
       setMensaje(
         isAuthenticated
           ? "Grupo agregado a tu horario."
-          : "Grupo agregado a tu horario (guardado en este navegador — iniciá sesión para no perderlo).",
+          : "Grupo agregado a tu horario (guardado en este navegador — inicia sesión para no perderlo).",
       )
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         const detail = err.detail as { message?: string }
-        setMensaje(detail.message ?? "Este grupo cruza con otro que ya tenés en tu horario.")
+        setMensaje(detail.message ?? "Este grupo cruza con otro que ya tienes en tu horario.")
       } else if (err instanceof ApiError && err.status === 404) {
         setMensaje("Ya habías agregado este grupo antes.")
       } else {
-        setMensaje("No se pudo agregar el grupo, intentá de nuevo.")
+        setMensaje("No se pudo agregar el grupo, intenta de nuevo.")
       }
     }
   }
@@ -109,7 +109,7 @@ export default function Explorar() {
         <div>
           <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-slate-500">Asignaturas</h2>
           {asignaturas.length === 0 ? (
-            <p className="text-sm text-slate-500">Elegí facultad y plan para ver las asignaturas.</p>
+            <p className="text-sm text-slate-500">Elige facultad y plan para ver las asignaturas.</p>
           ) : (
             <ul className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
               {asignaturas.map((a) => (
@@ -141,7 +141,7 @@ export default function Explorar() {
             </p>
           )}
           {!seleccion ? (
-            <p className="text-sm text-slate-500">Elegí una asignatura para ver sus grupos.</p>
+            <p className="text-sm text-slate-500">Elige una asignatura para ver sus grupos.</p>
           ) : seleccion.grupos.length === 0 ? (
             <p className="text-sm text-slate-500">Esta asignatura no tiene grupos abiertos ahora mismo.</p>
           ) : (

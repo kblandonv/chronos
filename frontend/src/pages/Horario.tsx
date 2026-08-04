@@ -75,7 +75,7 @@ export default function Horario() {
         <p className="mt-6 text-sm text-slate-500">Cargando...</p>
       ) : grupos.length === 0 ? (
         <p className="mt-6 text-sm text-slate-500">
-          Todavía no agregaste ningún grupo. Andá a{" "}
+          Todavía no agregaste ningún grupo. Ve a{" "}
           <a href="/explorar" className="text-violet-600 hover:underline dark:text-violet-400">
             Explorar
           </a>{" "}

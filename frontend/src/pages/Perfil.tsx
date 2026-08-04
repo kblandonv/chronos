@@ -81,7 +81,7 @@ export default function Perfil() {
       <section className="mt-10">
         <h2 className="text-lg font-medium text-slate-900 dark:text-white">Mis carreras</h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Podés tener más de una — pregrado, posgrado, o ambas — y elegir el plan nuevo o el viejo
+          Puedes tener más de una — pregrado, posgrado, o ambas — y elegir el plan nuevo o el viejo
           si tu programa tiene los dos (se distinguen por el código).
         </p>
 
