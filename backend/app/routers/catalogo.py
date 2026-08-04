@@ -43,13 +43,26 @@ def list_planes(facultad_id: int, session: Session = Depends(get_session)):
     return session.exec(select(PlanEstudios).where(PlanEstudios.facultad_id == facultad_id)).all()
 
 
+@router.get("/planes/{plan_id}/tipologias", response_model=list[str])
+def list_tipologias(plan_id: int, session: Session = Depends(get_session)):
+    query = (
+        select(Asignatura.tipologia)
+        .join(AsignaturaPlan, AsignaturaPlan.asignatura_id == Asignatura.id)
+        .where(AsignaturaPlan.plan_estudios_id == plan_id)
+        .distinct()
+    )
+    return sorted(t for t in session.exec(query).all() if t)
+
+
 @router.get("/planes/{plan_id}/asignaturas", response_model=list[AsignaturaRead])
-def list_asignaturas(plan_id: int, session: Session = Depends(get_session)):
+def list_asignaturas(plan_id: int, tipologia: Optional[str] = None, session: Session = Depends(get_session)):
     query = (
         select(Asignatura)
         .join(AsignaturaPlan, AsignaturaPlan.asignatura_id == Asignatura.id)
         .where(AsignaturaPlan.plan_estudios_id == plan_id)
     )
+    if tipologia:
+        query = query.where(Asignatura.tipologia == tipologia)
     return session.exec(query).all()
 
 

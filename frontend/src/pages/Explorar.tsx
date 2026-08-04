@@ -13,6 +13,8 @@ export default function Explorar() {
   const [facultadId, setFacultadId] = useState<number | null>(null)
   const [planes, setPlanes] = useState<Plan[]>([])
   const [planId, setPlanId] = useState<number | null>(null)
+  const [tipologias, setTipologias] = useState<string[]>([])
+  const [tipologia, setTipologia] = useState("")
   const [asignaturas, setAsignaturas] = useState<Asignatura[]>([])
   const [seleccion, setSeleccion] = useState<AsignaturaDetail | null>(null)
   const [mensaje, setMensaje] = useState<string | null>(null)
@@ -31,10 +33,17 @@ export default function Explorar() {
   }, [facultadId])
 
   useEffect(() => {
+    setTipologia("")
     setSeleccion(null)
-    if (planId != null) api.asignaturas(planId).then(setAsignaturas)
-    else setAsignaturas([])
+    if (planId != null) api.tipologias(planId).then(setTipologias)
+    else setTipologias([])
   }, [planId])
+
+  useEffect(() => {
+    setSeleccion(null)
+    if (planId != null) api.asignaturas(planId, tipologia || undefined).then(setAsignaturas)
+    else setAsignaturas([])
+  }, [planId, tipologia])
 
   async function verAsignatura(id: number) {
     setSeleccion(await api.asignatura(id))
@@ -66,7 +75,7 @@ export default function Explorar() {
       <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Explorar asignaturas</h1>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sede Medellín</p>
 
-      <div className="mt-6 grid gap-3 sm:grid-cols-3">
+      <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <select
           value={nivel}
           onChange={(e) => setNivel(e.target.value)}
@@ -103,13 +112,30 @@ export default function Explorar() {
             </option>
           ))}
         </select>
+        <select
+          value={tipologia}
+          onChange={(e) => setTipologia(e.target.value)}
+          disabled={planId == null}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900"
+        >
+          <option value="">Todos los tipos</option>
+          {tipologias.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-2">
         <div>
           <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-slate-500">Asignaturas</h2>
           {asignaturas.length === 0 ? (
-            <p className="text-sm text-slate-500">Elige facultad y plan para ver las asignaturas.</p>
+            <p className="text-sm text-slate-500">
+              {planId == null
+                ? "Elige facultad y plan para ver las asignaturas."
+                : "No hay asignaturas de este tipo en el plan seleccionado."}
+            </p>
           ) : (
             <ul className="max-h-[32rem] space-y-2 overflow-y-auto pr-1">
               {asignaturas.map((a) => (

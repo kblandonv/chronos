@@ -41,7 +41,11 @@ export const api = {
   niveles: () => request<string[]>("/catalogo/niveles"),
   facultades: (nivel?: string) => request<Facultad[]>(`/catalogo/facultades${nivel ? `?nivel=${nivel}` : ""}`),
   planes: (facultadId: number) => request<Plan[]>(`/catalogo/facultades/${facultadId}/planes`),
-  asignaturas: (planId: number) => request<Asignatura[]>(`/catalogo/planes/${planId}/asignaturas`),
+  tipologias: (planId: number) => request<string[]>(`/catalogo/planes/${planId}/tipologias`),
+  asignaturas: (planId: number, tipologia?: string) =>
+    request<Asignatura[]>(
+      `/catalogo/planes/${planId}/asignaturas${tipologia ? `?tipologia=${encodeURIComponent(tipologia)}` : ""}`,
+    ),
   asignatura: (id: number) => request<AsignaturaDetail>(`/catalogo/asignaturas/${id}`),
   buscarAsignaturas: (q: string) => request<Asignatura[]>(`/catalogo/asignaturas?q=${encodeURIComponent(q)}`),
 
