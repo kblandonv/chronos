@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import { api } from "../lib/api"
 import { usePlanesStore } from "../lib/usePlanesStore"
-import { NIVELES, NIVEL_LABELS, type Facultad, type Plan } from "../lib/types"
+import { NIVELES, NIVEL_LABELS, SEDE_LABELS, type Facultad, type Plan } from "../lib/types"
 
 export default function Perfil() {
   const { user, isAuthenticated, loginWithRedirect } = useAuth0()
@@ -11,6 +11,8 @@ export default function Perfil() {
   const [misPlanes, setMisPlanes] = useState<Plan[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [sedes, setSedes] = useState<string[]>([])
+  const [sede, setSede] = useState<string>("")
   const [nivel, setNivel] = useState<string>(NIVELES[0])
   const [facultades, setFacultades] = useState<Facultad[]>([])
   const [facultadId, setFacultadId] = useState<number | null>(null)
@@ -27,11 +29,19 @@ export default function Perfil() {
   }, [isAuthenticated])
 
   useEffect(() => {
+    api.sedes().then((s) => {
+      setSedes(s)
+      setSede((current) => current || (s.includes("medellin") ? "medellin" : s[0]) || "")
+    })
+  }, [])
+
+  useEffect(() => {
     setFacultadId(null)
     setPlanes([])
     setPlanId(null)
-    api.facultades(nivel).then(setFacultades)
-  }, [nivel])
+    if (sede) api.facultades(nivel, sede).then(setFacultades)
+    else setFacultades([])
+  }, [nivel, sede])
 
   useEffect(() => {
     setPlanId(null)
@@ -115,7 +125,18 @@ export default function Perfil() {
 
         <div className="mt-6 rounded-xl border border-dashed border-slate-300 p-4 dark:border-slate-700">
           <p className="mb-3 text-sm font-medium text-slate-700 dark:text-slate-300">Agregar carrera</p>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <select
+              value={sede}
+              onChange={(e) => setSede(e.target.value)}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+            >
+              {sedes.map((s) => (
+                <option key={s} value={s}>
+                  {SEDE_LABELS[s] ?? s}
+                </option>
+              ))}
+            </select>
             <select
               value={nivel}
               onChange={(e) => setNivel(e.target.value)}
