@@ -2,12 +2,14 @@ import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import { ApiError, api } from "../lib/api"
 import { useHorarioStore } from "../lib/useHorarioStore"
-import { NIVELES, NIVEL_LABELS, type Asignatura, type AsignaturaDetail, type Facultad, type Grupo, type Plan } from "../lib/types"
+import { NIVELES, NIVEL_LABELS, SEDE_LABELS, type Asignatura, type AsignaturaDetail, type Facultad, type Grupo, type Plan } from "../lib/types"
 
 export default function Explorar() {
   const { isAuthenticated } = useAuth0()
   const horarioStore = useHorarioStore()
 
+  const [sedes, setSedes] = useState<string[]>([])
+  const [sede, setSede] = useState<string>("")
   const [nivel, setNivel] = useState<string>(NIVELES[0])
   const [facultades, setFacultades] = useState<Facultad[]>([])
   const [facultadId, setFacultadId] = useState<number | null>(null)
@@ -35,9 +37,17 @@ export default function Explorar() {
   }, [busqueda, buscando])
 
   useEffect(() => {
+    api.sedes().then((s) => {
+      setSedes(s)
+      setSede((current) => current || (s.includes("medellin") ? "medellin" : s[0]) || "")
+    })
+  }, [])
+
+  useEffect(() => {
     setFacultadId(null)
-    api.facultades(nivel).then(setFacultades)
-  }, [nivel])
+    if (sede) api.facultades(nivel, sede).then(setFacultades)
+    else setFacultades([])
+  }, [nivel, sede])
 
   useEffect(() => {
     setPlanId(null)
@@ -90,7 +100,9 @@ export default function Explorar() {
   return (
     <div className="mx-auto max-w-5xl px-6 py-12">
       <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Explorar asignaturas</h1>
-      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sede Medellín</p>
+      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        {SEDE_LABELS[sede] ?? "Elige una sede"}
+      </p>
 
       <input
         type="text"
@@ -100,7 +112,18 @@ export default function Explorar() {
         className="mt-6 w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:placeholder:text-slate-500"
       />
 
-      <div className={`mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4 ${buscando ? "opacity-50" : ""}`}>
+      <div className={`mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5 ${buscando ? "opacity-50" : ""}`}>
+        <select
+          value={sede}
+          onChange={(e) => setSede(e.target.value)}
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+        >
+          {sedes.map((s) => (
+            <option key={s} value={s}>
+              {SEDE_LABELS[s] ?? s}
+            </option>
+          ))}
+        </select>
         <select
           value={nivel}
           onChange={(e) => setNivel(e.target.value)}

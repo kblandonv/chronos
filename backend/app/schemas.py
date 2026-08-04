@@ -40,6 +40,7 @@ class AsignaturaDetailRead(AsignaturaRead):
 class FacultadRead(SQLModel):
     id: int
     codigo: str
+    sede: str
     nombre: str
 
 

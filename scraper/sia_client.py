@@ -16,7 +16,7 @@ calls. Two quirks matter here (see CLAUDE.md for the full writeup):
 """
 from bs4 import BeautifulSoup
 
-from config import SIA_CATALOGO_URL, SEDE_MEDELLIN
+from config import SIA_CATALOGO_URL
 
 NIVEL_SELECT = "pt1:r1:0:soc1::content"
 SEDE_SELECT = "pt1:r1:0:soc9::content"
@@ -65,7 +65,9 @@ class SiaClient:
 
     def select_nivel(self, nivel_value):
         self._select(NIVEL_SELECT, nivel_value)
-        self._select(SEDE_SELECT, SEDE_MEDELLIN)
+
+    def select_sede(self, sede_value):
+        self._select(SEDE_SELECT, sede_value)
 
     def list_facultades(self):
         return [o for o in self._options(FACULTAD_SELECT) if o["value"] != ""]

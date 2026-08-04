@@ -12,7 +12,7 @@ import sys
 
 from playwright.sync_api import sync_playwright
 
-from config import NIVELES
+from config import NIVELES, SEDES
 from db import get_session
 from parser import parse_grupos
 from persist import link_asignatura_plan, upsert_asignatura, upsert_facultad, upsert_plan, replace_grupos
@@ -29,7 +29,7 @@ def find_option(options, query):
     return match
 
 
-def scrape_plan(nivel_key, facultad_query, plan_query):
+def scrape_plan(nivel_key, facultad_query, plan_query, sede_key="medellin"):
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
@@ -37,6 +37,7 @@ def scrape_plan(nivel_key, facultad_query, plan_query):
         client.open()
 
         client.select_nivel(NIVELES[nivel_key])
+        client.select_sede(SEDES[sede_key])
 
         facultades = client.list_facultades()
         facultad_opt = find_option(facultades, facultad_query)
@@ -59,12 +60,12 @@ def scrape_plan(nivel_key, facultad_query, plan_query):
         pendientes = {row["codigo"] for row in rows}
 
         with get_session() as session:
-            facultad = upsert_facultad(session, facultad_opt["text"])
+            facultad = upsert_facultad(session, facultad_opt["text"], sede_key)
             plan = upsert_plan(session, plan_opt["text"], nivel_key, facultad.id)
             session.commit()
 
             for row in rows:
-                asignatura = upsert_asignatura(session, row)
+                asignatura = upsert_asignatura(session, row, sede_key)
                 link_asignatura_plan(session, asignatura.id, plan.id)
                 session.commit()
 
@@ -75,7 +76,7 @@ def scrape_plan(nivel_key, facultad_query, plan_query):
 
                 detail = client.expand_asignatura(row["link_id"])
                 grupos = parse_grupos(detail)
-                asignatura = upsert_asignatura(session, row)
+                asignatura = upsert_asignatura(session, row, sede_key)
                 replace_grupos(session, asignatura.id, grupos)
                 session.commit()
                 log.info("  %s (%s): %d grupos", asignatura.codigo, asignatura.nombre, len(grupos))

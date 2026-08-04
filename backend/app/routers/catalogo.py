@@ -26,8 +26,15 @@ def list_niveles() -> list[str]:
     return ["pregrado", "doctorado", "postgrado"]
 
 
+@router.get("/sedes", response_model=list[str])
+def list_sedes(session: Session = Depends(get_session)):
+    """Only sedes that actually have scraped data -- the crawl runs sede by
+    sede, so this grows over time rather than listing all nine up front."""
+    return sorted(session.exec(select(Facultad.sede).distinct()).all())
+
+
 @router.get("/facultades", response_model=list[FacultadRead])
-def list_facultades(nivel: Optional[str] = None, session: Session = Depends(get_session)):
+def list_facultades(nivel: Optional[str] = None, sede: Optional[str] = None, session: Session = Depends(get_session)):
     query = select(Facultad)
     if nivel:
         query = (
@@ -36,6 +43,8 @@ def list_facultades(nivel: Optional[str] = None, session: Session = Depends(get_
             .where(PlanEstudios.nivel == nivel)
             .distinct()
         )
+    if sede:
+        query = query.where(Facultad.sede == sede)
     return session.exec(query).all()
 
 

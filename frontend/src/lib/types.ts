@@ -34,6 +34,7 @@ export interface AsignaturaDetail extends Asignatura {
 export interface Facultad {
   id: number
   codigo: string
+  sede: string
   nombre: string
 }
 
@@ -89,4 +90,16 @@ export const NIVEL_LABELS: Record<string, string> = {
   pregrado: "Pregrado",
   doctorado: "Doctorado",
   postgrado: "Posgrado / Maestría",
+}
+
+export const SEDE_LABELS: Record<string, string> = {
+  amazonia: "Sede Amazonia",
+  bogota: "Sede Bogotá",
+  caribe: "Sede Caribe",
+  de_la_paz: "Sede De La Paz",
+  manizales: "Sede Manizales",
+  medellin: "Sede Medellín",
+  orinoquia: "Sede Orinoquia",
+  palmira: "Sede Palmira",
+  tumaco: "Sede Tumaco",
 }

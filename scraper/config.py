@@ -15,4 +15,16 @@ NIVELES = {
     "doctorado": "1",
     "postgrado": "2",
 }
-SEDE_MEDELLIN = "6"
+
+# option value -> key used as Facultad.sede. Order matches the SIA select.
+SEDES = {
+    "amazonia": "1",
+    "bogota": "2",
+    "caribe": "3",
+    "de_la_paz": "4",
+    "manizales": "5",
+    "medellin": "6",
+    "orinoquia": "7",
+    "palmira": "8",
+    "tumaco": "9",
+}

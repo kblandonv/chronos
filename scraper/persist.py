@@ -12,11 +12,13 @@ def split_codigo_nombre(text):
     return codigo, nombre.strip()
 
 
-def upsert_facultad(session, option_text):
+def upsert_facultad(session, option_text, sede):
     codigo, nombre = split_codigo_nombre(option_text)
-    facultad = session.exec(select(Facultad).where(Facultad.codigo == codigo)).first()
+    facultad = session.exec(
+        select(Facultad).where(Facultad.codigo == codigo, Facultad.sede == sede)
+    ).first()
     if facultad is None:
-        facultad = Facultad(codigo=codigo, nombre=nombre)
+        facultad = Facultad(codigo=codigo, nombre=nombre, sede=sede)
         session.add(facultad)
         session.flush()
     return facultad
@@ -24,7 +26,9 @@ def upsert_facultad(session, option_text):
 
 def upsert_plan(session, option_text, nivel, facultad_id):
     codigo, nombre = split_codigo_nombre(option_text)
-    plan = session.exec(select(PlanEstudios).where(PlanEstudios.codigo == codigo)).first()
+    plan = session.exec(
+        select(PlanEstudios).where(PlanEstudios.codigo == codigo, PlanEstudios.facultad_id == facultad_id)
+    ).first()
     if plan is None:
         plan = PlanEstudios(codigo=codigo, nombre=nombre, nivel=nivel, facultad_id=facultad_id)
         session.add(plan)
@@ -32,13 +36,16 @@ def upsert_plan(session, option_text, nivel, facultad_id):
     return plan
 
 
-def upsert_asignatura(session, row):
+def upsert_asignatura(session, row, sede):
     codigo = row["codigo"].strip()
-    asignatura = session.exec(select(Asignatura).where(Asignatura.codigo == codigo)).first()
+    asignatura = session.exec(
+        select(Asignatura).where(Asignatura.codigo == codigo, Asignatura.sede == sede)
+    ).first()
     creditos = int(row["creditos"]) if row["creditos"].isdigit() else None
     if asignatura is None:
         asignatura = Asignatura(
             codigo=codigo,
+            sede=sede,
             nombre=row["nombre"],
             creditos=creditos,
             tipologia=row["tipologia"],

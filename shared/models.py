@@ -1,33 +1,55 @@
 import datetime
 from typing import Any, Optional
 
-from sqlalchemy import Column, JSON
+from sqlalchemy import Column, JSON, UniqueConstraint
 from sqlmodel import Field, SQLModel
 
 
 class Facultad(SQLModel, table=True):
+    """A facultad belongs to exactly one sede. The same institutional
+    codigo could in principle be reused across sedes (unconfirmed until
+    every sede is scraped), so the two together are the real identity --
+    not codigo alone."""
+
     __tablename__ = "facultad"
+    __table_args__ = (UniqueConstraint("codigo", "sede", name="uq_facultad_codigo_sede"),)
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    codigo: str = Field(unique=True, index=True)
+    codigo: str = Field(index=True)
+    sede: str = Field(index=True)
     nombre: str
 
 
 class PlanEstudios(SQLModel, table=True):
+    """The same codigo can be reused for what SIA considers 'the same'
+    nationally-registered program taught at more than one sede (confirmed:
+    '3501 ARQUITECTURA' exists under both Medellin's and Amazonia's
+    Facultad de Arquitectura). Each sede's offering has its own facultad,
+    asignaturas and grupos though, so codigo alone can't be the identity --
+    (codigo, facultad_id) is."""
+
     __tablename__ = "plan_estudios"
+    __table_args__ = (UniqueConstraint("codigo", "facultad_id", name="uq_plan_codigo_facultad"),)
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    codigo: str = Field(unique=True, index=True)
+    codigo: str = Field(index=True)
     nombre: str
     nivel: str  # pregrado | doctorado | postgrado
     facultad_id: int = Field(foreign_key="facultad.id")
 
 
 class Asignatura(SQLModel, table=True):
+    """Same reuse-across-sedes issue as PlanEstudios -- confirmed the hard
+    way: fundamentacion courses (INGLES I, CALCULO DIFERENCIAL, etc.) share
+    a codigo across every sede, but each sede runs its own grupos/horarios
+    for it. Scoped by (codigo, sede), not codigo alone."""
+
     __tablename__ = "asignatura"
+    __table_args__ = (UniqueConstraint("codigo", "sede", name="uq_asignatura_codigo_sede"),)
 
     id: Optional[int] = Field(default=None, primary_key=True)
-    codigo: str = Field(unique=True, index=True)
+    codigo: str = Field(index=True)
+    sede: str = Field(index=True)
     nombre: str
     creditos: Optional[int] = None
     tipologia: Optional[str] = None

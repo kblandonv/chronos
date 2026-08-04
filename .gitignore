@@ -15,8 +15,8 @@ build/
 
 # Playwright
 scraper/explore_output.json
-scraper/*.png
-scraper/crawl.log
+scraper/**/*.png
+scraper/crawl*.log
 
 # Env / secrets
 .env

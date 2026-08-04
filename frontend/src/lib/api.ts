@@ -39,7 +39,14 @@ async function request<T>(path: string, token?: string, options: RequestInit = {
 
 export const api = {
   niveles: () => request<string[]>("/catalogo/niveles"),
-  facultades: (nivel?: string) => request<Facultad[]>(`/catalogo/facultades${nivel ? `?nivel=${nivel}` : ""}`),
+  sedes: () => request<string[]>("/catalogo/sedes"),
+  facultades: (nivel?: string, sede?: string) => {
+    const params = new URLSearchParams()
+    if (nivel) params.set("nivel", nivel)
+    if (sede) params.set("sede", sede)
+    const qs = params.toString()
+    return request<Facultad[]>(`/catalogo/facultades${qs ? `?${qs}` : ""}`)
+  },
   planes: (facultadId: number, nivel?: string) =>
     request<Plan[]>(`/catalogo/facultades/${facultadId}/planes${nivel ? `?nivel=${nivel}` : ""}`),
   tipologias: (planId: number) => request<string[]>(`/catalogo/planes/${planId}/tipologias`),
