@@ -9,6 +9,7 @@ from alembic import context
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from shared.db_url import normalize_database_url  # noqa: E402
 from shared.models import SQLModel  # noqa: E402
 from sqlmodel.sql.sqltypes import AutoString  # noqa: E402
 
@@ -31,7 +32,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 if os.environ.get("DATABASE_URL"):
-    config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
+    config.set_main_option("sqlalchemy.url", normalize_database_url(os.environ["DATABASE_URL"]))
 
 target_metadata = SQLModel.metadata
 

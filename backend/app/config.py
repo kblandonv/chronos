@@ -2,9 +2,11 @@ import os
 
 from dotenv import load_dotenv
 
+from shared.db_url import normalize_database_url
+
 load_dotenv()
 
-DATABASE_URL = os.environ["DATABASE_URL"]
+DATABASE_URL = normalize_database_url(os.environ["DATABASE_URL"])
 AUTH0_DOMAIN = os.environ["AUTH0_DOMAIN"]
 AUTH0_AUDIENCE = os.environ["AUTH0_AUDIENCE"]
 FRONTEND_ORIGINS = [
