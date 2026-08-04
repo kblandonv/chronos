@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import AvanceCharacter from "../components/AvanceCharacter"
+import PapaProjector from "../components/PapaProjector"
 import { useHistoriaStore } from "../lib/useHistoriaStore"
 import type { HistoriaAcademica as HistoriaAcademicaData } from "../lib/types"
 
@@ -149,6 +150,8 @@ export default function HistoriaAcademica() {
               </div>
             </section>
           )}
+
+          <PapaProjector asignaturas={historia.asignaturas} papaActual={historia.papa_acumulado} />
 
           <section>
             <h2 className="mb-3 text-sm font-medium uppercase tracking-wide text-slate-500">

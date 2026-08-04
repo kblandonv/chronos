@@ -1,18 +1,9 @@
 import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
+import { exportToExcel, exportToICS } from "../lib/exportHorario"
 import { useHorarioStore } from "../lib/useHorarioStore"
-import type { Grupo } from "../lib/types"
+import { DIAS, DIA_LABELS, type Grupo } from "../lib/types"
 
-const DIAS = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"]
-const DIA_LABELS: Record<string, string> = {
-  LUNES: "Lunes",
-  MARTES: "Martes",
-  MIERCOLES: "Miércoles",
-  JUEVES: "Jueves",
-  VIERNES: "Viernes",
-  SABADO: "Sábado",
-  DOMINGO: "Domingo",
-}
 const HORA_INICIO = 6
 const HORA_FIN = 22
 const PX_POR_HORA = 56
@@ -57,7 +48,25 @@ export default function Horario() {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
-      <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Mi horario</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Mi horario</h1>
+        {grupos.length > 0 && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => exportToExcel(grupos)}
+              className="rounded-full border border-slate-300 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+            >
+              Exportar a Excel
+            </button>
+            <button
+              onClick={() => exportToICS(grupos)}
+              className="rounded-full border border-slate-300 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+            >
+              Agregar a calendario
+            </button>
+          </div>
+        )}
+      </div>
 
       {!isAuthenticated && (
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300/60 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
@@ -135,10 +144,12 @@ export default function Horario() {
                           <div
                             key={`${g.id}-${hi}`}
                             className={`absolute inset-x-1 overflow-hidden rounded-lg border p-1.5 text-[11px] leading-tight ${colorPorGrupo.get(g.id)}`}
-                            style={{ top, height: Math.max(height, 24) }}
+                            style={{ top, height: Math.max(height, 40) }}
                           >
                             <p className="truncate font-semibold">{g.asignatura_nombre ?? "Asignatura"}</p>
-                            <p>Grupo {g.numero}</p>
+                            <p className="truncate">Grupo {g.numero}</p>
+                            <p className="truncate">{g.profesor ?? "Sin profesor"}</p>
+                            <p className="truncate">Cupos: {g.cupos_disponibles ?? "?"}</p>
                           </div>
                         )
                       }),
@@ -160,7 +171,9 @@ export default function Horario() {
                     <p className="font-medium text-slate-900 dark:text-white">
                       {g.asignatura_nombre ?? "Asignatura"} — Grupo {g.numero}
                     </p>
-                    <p className="text-xs text-slate-500">{g.profesor ?? "Sin profesor asignado"}</p>
+                    <p className="text-xs text-slate-500">
+                      {g.profesor ?? "Sin profesor asignado"} · Cupos: {g.cupos_disponibles ?? "?"}
+                    </p>
                   </div>
                 </div>
                 <button

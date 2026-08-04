@@ -92,6 +92,18 @@ export const NIVEL_LABELS: Record<string, string> = {
   postgrado: "Posgrado / Maestría",
 }
 
+export const DIAS = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"]
+
+export const DIA_LABELS: Record<string, string> = {
+  LUNES: "Lunes",
+  MARTES: "Martes",
+  MIERCOLES: "Miércoles",
+  JUEVES: "Jueves",
+  VIERNES: "Viernes",
+  SABADO: "Sábado",
+  DOMINGO: "Domingo",
+}
+
 export const SEDE_LABELS: Record<string, string> = {
   amazonia: "Sede Amazonia",
   bogota: "Sede Bogotá",
