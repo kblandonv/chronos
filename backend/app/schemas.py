@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import Any, Optional
 
 from sqlmodel import SQLModel
 
@@ -55,3 +55,18 @@ class UsuarioRead(SQLModel):
     id: int
     email: str
     nombre: Optional[str] = None
+
+
+class HistoriaAcademicaRead(SQLModel):
+    plan_codigo: Optional[str] = None
+    plan_nombre: Optional[str] = None
+    facultad: Optional[str] = None
+    porcentaje_avance: Optional[float] = None
+    promedio_acumulado: Optional[float] = None
+    papa_acumulado: Optional[float] = None
+    asignaturas: list[dict[str, Any]] = []
+    resumen_creditos: list[dict[str, Any]] = []
+
+
+class HistoriaAcademicaInput(SQLModel):
+    text: str

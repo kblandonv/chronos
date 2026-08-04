@@ -1,6 +1,7 @@
 import datetime
-from typing import Optional
+from typing import Any, Optional
 
+from sqlalchemy import Column, JSON
 from sqlmodel import Field, SQLModel
 
 
@@ -95,3 +96,22 @@ class UsuarioPlan(SQLModel, table=True):
     usuario_id: int = Field(foreign_key="usuario.id", primary_key=True)
     plan_estudios_id: int = Field(foreign_key="plan_estudios.id", primary_key=True)
     added_at: datetime.datetime
+
+
+class HistoriaAcademica(SQLModel, table=True):
+    """A student's transcript, as pasted from SIA's "Historia Academica"
+    page and parsed by app.historia_parser. One per usuario -- pasting again
+    replaces it."""
+
+    __tablename__ = "historia_academica"
+
+    usuario_id: int = Field(foreign_key="usuario.id", primary_key=True)
+    plan_codigo: Optional[str] = None
+    plan_nombre: Optional[str] = None
+    facultad: Optional[str] = None
+    porcentaje_avance: Optional[float] = None
+    promedio_acumulado: Optional[float] = None
+    papa_acumulado: Optional[float] = None
+    asignaturas: list[Any] = Field(sa_column=Column(JSON))
+    resumen_creditos: list[Any] = Field(sa_column=Column(JSON))
+    actualizado_at: datetime.datetime

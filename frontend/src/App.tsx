@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import NavBar from "./components/NavBar"
 import { useMigrateOnLogin } from "./lib/useMigrateOnLogin"
 import Explorar from "./pages/Explorar"
+import HistoriaAcademica from "./pages/HistoriaAcademica"
 import Horario from "./pages/Horario"
 import Landing from "./pages/Landing"
 import Perfil from "./pages/Perfil"
@@ -24,6 +25,7 @@ function AppShell() {
             <Route path="/explorar" element={<Explorar />} />
             <Route path="/perfil" element={<Perfil />} />
             <Route path="/horario" element={<Horario />} />
+            <Route path="/historia" element={<HistoriaAcademica />} />
           </Routes>
         </main>
       </div>

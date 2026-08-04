@@ -51,6 +51,37 @@ export interface Usuario {
   nombre: string | null
 }
 
+export interface AsignaturaHistorial {
+  nombre: string
+  codigo: string
+  creditos: number
+  tipo: string
+  periodo: string
+  modalidad: string
+  calificacion: number | null
+  estado: string
+}
+
+export interface ResumenCreditos {
+  tipologia: string
+  exigidos: number
+  aprobados: number
+  pendientes: number
+  inscritos: number
+  cursados: number
+}
+
+export interface HistoriaAcademica {
+  plan_codigo: string | null
+  plan_nombre: string | null
+  facultad: string | null
+  porcentaje_avance: number | null
+  promedio_acumulado: number | null
+  papa_acumulado: number | null
+  asignaturas: AsignaturaHistorial[]
+  resumen_creditos: ResumenCreditos[]
+}
+
 export const NIVELES = ["pregrado", "doctorado", "postgrado"] as const
 export type Nivel = (typeof NIVELES)[number]
 

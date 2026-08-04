@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react"
 import { useEffect, useRef } from "react"
-import { localHorario, localPlanes } from "./localStore"
+import { localHistoria, localHorario, localPlanes } from "./localStore"
 import { useApi } from "./useApi"
 
 /**
@@ -20,7 +20,8 @@ export function useMigrateOnLogin() {
 
     const grupos = localHorario.list()
     const planes = localPlanes.list()
-    if (grupos.length === 0 && planes.length === 0) return
+    const historiaTexto = localHistoria.getRaw()
+    if (grupos.length === 0 && planes.length === 0 && !historiaTexto) return
 
     void (async () => {
       for (const g of grupos) {
@@ -37,8 +38,16 @@ export function useMigrateOnLogin() {
           // ignore
         }
       }
+      if (historiaTexto) {
+        try {
+          await apiMe.guardarHistoria(historiaTexto)
+        } catch {
+          // ignore
+        }
+      }
       localHorario.clear()
       localPlanes.clear()
+      localHistoria.clear()
     })()
   }, [isAuthenticated, isLoading, apiMe])
 }

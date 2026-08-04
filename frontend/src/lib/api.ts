@@ -1,4 +1,4 @@
-import type { Asignatura, AsignaturaDetail, Facultad, Grupo, Plan, Usuario } from "./types"
+import type { Asignatura, AsignaturaDetail, Facultad, Grupo, HistoriaAcademica, Plan, Usuario } from "./types"
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000"
 
@@ -57,4 +57,16 @@ export const api = {
     request<Plan>(`/me/planes/${planId}`, token, { method: "POST" }),
   quitarPlan: (token: string, planId: number) =>
     request<void>(`/me/planes/${planId}`, token, { method: "DELETE" }),
+
+  parseHistoria: (text: string) =>
+    request<HistoriaAcademica>("/historia/parse", undefined, {
+      method: "POST",
+      body: JSON.stringify({ text }),
+    }),
+  miHistoria: (token: string) => request<HistoriaAcademica>("/me/historia", token),
+  guardarHistoria: (token: string, text: string) =>
+    request<HistoriaAcademica>("/me/historia", token, {
+      method: "PUT",
+      body: JSON.stringify({ text }),
+    }),
 }

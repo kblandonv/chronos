@@ -2,6 +2,7 @@ import type { Grupo, Plan } from "./types"
 
 const HORARIO_KEY = "chronos:horario"
 const PLANES_KEY = "chronos:planes"
+const HISTORIA_KEY = "chronos:historia"
 
 function read<T>(key: string): T[] {
   try {
@@ -44,4 +45,12 @@ export const localPlanes = {
     write(PLANES_KEY, read<Plan>(PLANES_KEY).filter((p) => p.id !== planId))
   },
   clear: () => localStorage.removeItem(PLANES_KEY),
+}
+
+export const localHistoria = {
+  // The raw pasted text is the source of truth (not the parsed result) so
+  // there's a single migration path on login: just PUT the same text.
+  getRaw: (): string | null => localStorage.getItem(HISTORIA_KEY),
+  setRaw: (text: string) => localStorage.setItem(HISTORIA_KEY, text),
+  clear: () => localStorage.removeItem(HISTORIA_KEY),
 }

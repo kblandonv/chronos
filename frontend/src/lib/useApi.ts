@@ -22,5 +22,7 @@ export function useApi() {
     misPlanes: () => withToken(api.misPlanes),
     agregarPlan: (planId: number) => withToken((t) => api.agregarPlan(t, planId)),
     quitarPlan: (planId: number) => withToken((t) => api.quitarPlan(t, planId)),
+    miHistoria: () => withToken(api.miHistoria),
+    guardarHistoria: (text: string) => withToken((t) => api.guardarHistoria(t, text)),
   }
 }

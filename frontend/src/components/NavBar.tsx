@@ -20,6 +20,9 @@ export default function NavBar() {
           <Link to="/horario" className={linkClass}>
             Mi horario
           </Link>
+          <Link to="/historia" className={linkClass}>
+            Mi historia académica
+          </Link>
           <Link to="/perfil" className={linkClass}>
             Mi perfil
           </Link>
