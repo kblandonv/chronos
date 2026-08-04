@@ -6,14 +6,20 @@ from sqlmodel import Session, select
 from app.auth import get_current_user
 from app.db import get_session
 from app.schemas import GrupoRead, HorarioRead, UsuarioRead
-from shared.models import Grupo, GrupoHorario, Usuario, UsuarioGrupo
+from shared.models import Asignatura, Grupo, GrupoHorario, Usuario, UsuarioGrupo
 
 router = APIRouter(prefix="/me", tags=["horario"])
 
 
 def _grupo_read(session: Session, grupo: Grupo) -> GrupoRead:
     horarios = session.exec(select(GrupoHorario).where(GrupoHorario.grupo_id == grupo.id)).all()
-    return GrupoRead(**grupo.model_dump(), horarios=[HorarioRead(**h.model_dump()) for h in horarios])
+    asignatura = session.get(Asignatura, grupo.asignatura_id)
+    return GrupoRead(
+        **grupo.model_dump(),
+        asignatura_codigo=asignatura.codigo if asignatura else None,
+        asignatura_nombre=asignatura.nombre if asignatura else None,
+        horarios=[HorarioRead(**h.model_dump()) for h in horarios],
+    )
 
 
 def _grupos_del_usuario(session: Session, usuario_id: int) -> list[Grupo]:

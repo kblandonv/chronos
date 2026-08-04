@@ -82,3 +82,16 @@ class UsuarioGrupo(SQLModel, table=True):
     usuario_id: int = Field(foreign_key="usuario.id", primary_key=True)
     grupo_id: int = Field(foreign_key="grupo.id", primary_key=True)
     added_at: datetime.datetime
+
+
+class UsuarioPlan(SQLModel, table=True):
+    """A plan de estudios (carrera) the user is enrolled in. A student can
+    have more than one at once (e.g. pregrado + posgrado, or a double
+    program), so this is many-to-many rather than a single field on Usuario.
+    """
+
+    __tablename__ = "usuario_plan"
+
+    usuario_id: int = Field(foreign_key="usuario.id", primary_key=True)
+    plan_estudios_id: int = Field(foreign_key="plan_estudios.id", primary_key=True)
+    added_at: datetime.datetime

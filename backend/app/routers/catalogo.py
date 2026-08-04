@@ -10,9 +10,14 @@ from shared.models import Asignatura, AsignaturaPlan, Facultad, Grupo, GrupoHora
 router = APIRouter(prefix="/catalogo", tags=["catalogo"])
 
 
-def _grupo_read(session: Session, grupo: Grupo) -> GrupoRead:
+def _grupo_read(session: Session, grupo: Grupo, asignatura: Asignatura) -> GrupoRead:
     horarios = session.exec(select(GrupoHorario).where(GrupoHorario.grupo_id == grupo.id)).all()
-    return GrupoRead(**grupo.model_dump(), horarios=[HorarioRead(**h.model_dump()) for h in horarios])
+    return GrupoRead(
+        **grupo.model_dump(),
+        asignatura_codigo=asignatura.codigo,
+        asignatura_nombre=asignatura.nombre,
+        horarios=[HorarioRead(**h.model_dump()) for h in horarios],
+    )
 
 
 @router.get("/niveles")
@@ -62,5 +67,5 @@ def get_asignatura(asignatura_id: int, session: Session = Depends(get_session)):
     grupos = session.exec(select(Grupo).where(Grupo.asignatura_id == asignatura_id)).all()
     return AsignaturaDetailRead(
         **asignatura.model_dump(),
-        grupos=[_grupo_read(session, g) for g in grupos],
+        grupos=[_grupo_read(session, g, asignatura) for g in grupos],
     )

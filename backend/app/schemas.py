@@ -13,6 +13,8 @@ class HorarioRead(SQLModel):
 class GrupoRead(SQLModel):
     id: int
     asignatura_id: int
+    asignatura_codigo: Optional[str] = None
+    asignatura_nombre: Optional[str] = None
     numero: int
     profesor: Optional[str] = None
     jornada: Optional[str] = None

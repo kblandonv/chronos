@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import FRONTEND_ORIGIN
-from app.routers import catalogo, horario
+from app.routers import catalogo, horario, perfil
 
 app = FastAPI(title="Chronos API")
 
@@ -16,6 +16,7 @@ app.add_middleware(
 
 app.include_router(catalogo.router)
 app.include_router(horario.router)
+app.include_router(perfil.router)
 
 
 @app.get("/health")
