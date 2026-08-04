@@ -71,7 +71,7 @@ export default function PapaProjector({ asignaturas, papaActual }: Props) {
         Proyectar P.A.P.A del próximo semestre
       </h2>
       <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-        Agregá las asignaturas que estás cursando con la nota que esperás sacar, y calculamos cómo quedaría tu
+        Agrega las asignaturas que estás cursando con la nota que esperas sacar, y calculamos cómo quedaría tu
         P.A.P.A sumando eso a tu historial.
       </p>
 
@@ -129,12 +129,12 @@ export default function PapaProjector({ asignaturas, papaActual }: Props) {
       <div className="mt-6 flex gap-10">
         <div>
           <p className="text-sm text-slate-500 dark:text-slate-400">P.A.P.A actual</p>
-          <p className="text-2xl font-semibold text-slate-900 dark:text-white">{papaActual?.toFixed(2) ?? "—"}</p>
+          <p className="text-2xl font-semibold text-slate-900 dark:text-white">{papaActual?.toFixed(1) ?? "—"}</p>
         </div>
         <div>
           <p className="text-sm text-slate-500 dark:text-slate-400">P.A.P.A proyectado</p>
           <p className="text-2xl font-semibold text-violet-600 dark:text-violet-400">
-            {papaProyectado != null ? papaProyectado.toFixed(2) : "—"}
+            {papaProyectado != null ? papaProyectado.toFixed(1) : "—"}
           </p>
         </div>
       </div>

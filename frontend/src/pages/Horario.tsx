@@ -144,12 +144,13 @@ export default function Horario() {
                           <div
                             key={`${g.id}-${hi}`}
                             className={`absolute inset-x-1 overflow-hidden rounded-lg border p-1.5 text-[11px] leading-tight ${colorPorGrupo.get(g.id)}`}
-                            style={{ top, height: Math.max(height, 40) }}
+                            style={{ top, height: Math.max(height, 56) }}
                           >
                             <p className="truncate font-semibold">{g.asignatura_nombre ?? "Asignatura"}</p>
                             <p className="truncate">Grupo {g.numero}</p>
                             <p className="truncate">{g.profesor ?? "Sin profesor"}</p>
                             <p className="truncate">Cupos: {g.cupos_disponibles ?? "?"}</p>
+                            {h.aula && <p className="truncate">{h.aula}</p>}
                           </div>
                         )
                       }),

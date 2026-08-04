@@ -25,6 +25,7 @@ export async function exportToExcel(grupos: Grupo[]) {
       Día: DIA_LABELS[h.dia] ?? h.dia,
       "Hora inicio": h.hora_inicio.slice(0, 5),
       "Hora fin": h.hora_fin.slice(0, 5),
+      Aula: h.aula ?? "",
       "Cupos disponibles": g.cupos_disponibles ?? "",
       Jornada: g.jornada ?? "",
     })),
@@ -91,6 +92,7 @@ export function exportToICS(grupos: Grupo[]) {
         `RRULE:FREQ=WEEKLY;UNTIL=${until}`,
         `SUMMARY:${escapeICS(`${g.asignatura_nombre ?? "Asignatura"} (Grupo ${g.numero})`)}`,
         `DESCRIPTION:${escapeICS(`Profesor: ${g.profesor ?? "No informado"}\nCupos disponibles: ${g.cupos_disponibles ?? "?"}`)}`,
+        ...(h.aula ? [`LOCATION:${escapeICS(h.aula)}`] : []),
         "END:VEVENT",
       )
     }

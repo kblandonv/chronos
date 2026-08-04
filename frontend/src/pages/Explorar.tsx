@@ -234,6 +234,7 @@ export default function Explorar() {
                         {g.horarios.map((h, i) => (
                           <li key={i}>
                             {h.dia} {h.hora_inicio.slice(0, 5)} - {h.hora_fin.slice(0, 5)}
+                            {h.aula && ` · ${h.aula}`}
                           </li>
                         ))}
                       </ul>

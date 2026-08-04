@@ -120,5 +120,6 @@ def replace_grupos(session, asignatura_id, grupos):
                     dia=h["dia"],
                     hora_inicio=_parse_hora(h["hora_inicio"]),
                     hora_fin=_parse_hora(h["hora_fin"]),
+                    aula=h.get("aula"),
                 )
             )

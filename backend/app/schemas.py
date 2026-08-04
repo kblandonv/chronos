@@ -8,6 +8,7 @@ class HorarioRead(SQLModel):
     dia: str
     hora_inicio: datetime.time
     hora_fin: datetime.time
+    aula: Optional[str] = None
 
 
 class GrupoRead(SQLModel):

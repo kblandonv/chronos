@@ -3,9 +3,23 @@ Parses the "Grupo" detail blocks (professor, schedule, room, capacity) out
 of the BeautifulSoup returned by SiaClient.expand_asignatura().
 
 See scraper/fixtures/detalle_asignatura.html for a real captured example.
-Each subject can have several groups; each group can meet on more than one
-day, so the schedule ("Horarios/Aula") text is parsed with a regex that
-finds every "DIA de HH:MM a HH:MM" occurrence rather than assuming just one.
+Each subject can have several groups, and each group can meet on more than
+one day -- with a *different room* per day in principle, since the aula
+breadcrumb is nested inside each individual day/time span, not the group.
+Structure (see CLAUDE.md for the annotated version):
+
+    <span class="lista-elemento">          <!-- one weekly occurrence -->
+      <span>DOMINGO de 13:00 a 14:00.</span>
+      <span class="lista-elemento">        <!-- nested: the room breadcrumb -->
+        <span>Cursos Dirigidos o virtuales de la Sede.</span>
+        <span>Virtual-4.</span>
+        <span>Aulas virtuales.</span>
+        <span>SALA DE INFORMATICA O DE COMPUTO.</span>
+      </span>
+    </span>
+
+Only validated against "Virtual" groups so far -- an in-person room's
+breadcrumb text hasn't been seen yet, though the structure should hold.
 """
 import re
 
@@ -21,6 +35,37 @@ DIAS_VALIDOS = {
 
 def _text(el):
     return el.get_text(" ", strip=True) if el else None
+
+
+def _parse_horarios_con_aula(horario_block):
+    if horario_block is None:
+        return []
+
+    horarios = []
+    for item in horario_block.find_all("span", class_="lista-elemento"):
+        # the room breadcrumb is ALSO a "lista-elemento" span, nested inside
+        # the day/time one -- skip it here, it gets picked up as `aula`
+        # when we process its parent below.
+        if item.find_parent("span", class_="lista-elemento") is not None:
+            continue
+
+        direct_spans = item.find_all("span", recursive=False)
+        if not direct_spans:
+            continue
+        m = HORARIO_RE.match(direct_spans[0].get_text(strip=True))
+        if not m:
+            continue
+
+        aula_span = item.find("span", class_="lista-elemento")
+        horarios.append(
+            {
+                "dia": m.group(1),
+                "hora_inicio": m.group(2),
+                "hora_fin": m.group(3),
+                "aula": _text(aula_span),
+            }
+        )
+    return horarios
 
 
 def parse_grupos(soup):
@@ -66,12 +111,9 @@ def parse_grupos(soup):
             if len(dates) >= 2:
                 fecha_inicio, fecha_fin = dates[0], dates[1]
 
-        horario_block = content.find(string=re.compile(r"Horarios/Aula"))
-        full_text = horario_block.find_parent("span").get_text(" ", strip=True) if horario_block else ""
-        horarios = [
-            {"dia": dia, "hora_inicio": inicio, "hora_fin": fin}
-            for dia, inicio, fin in HORARIO_RE.findall(full_text)
-        ]
+        horario_label = content.find(string=re.compile(r"Horarios/Aula"))
+        horario_block = horario_label.find_parent("span") if horario_label else None
+        horarios = _parse_horarios_con_aula(horario_block)
 
         grupos.append(
             {
