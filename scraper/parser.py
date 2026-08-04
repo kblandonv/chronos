@@ -27,10 +27,16 @@ HORARIO_RE = re.compile(
     r"([A-ZÁÉÍÓÚÑ]+)\s+de\s+(\d{2}:\d{2})\s+a\s+(\d{2}:\d{2})"
 )
 
-DIAS_VALIDOS = {
-    "LUNES", "MARTES", "MIERCOLES", "MIÉRCOLES", "JUEVES",
-    "VIERNES", "SABADO", "SÁBADO", "DOMINGO",
-}
+DIAS_VALIDOS = {"LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"}
+
+_TRADUCTOR_TILDES = str.maketrans("ÁÉÍÓÚÑ", "AEIOUN")
+
+
+def _normalizar_dia(dia):
+    """SIA renders some day names with tildes (MIÉRCOLES, SÁBADO) and others
+    without -- strip them so `dia` always matches DIAS_VALIDOS / the frontend's
+    day constants, which are all unaccented."""
+    return dia.translate(_TRADUCTOR_TILDES)
 
 
 def _text(el):
@@ -59,7 +65,7 @@ def _parse_horarios_con_aula(horario_block):
         aula_span = item.find("span", class_="lista-elemento")
         horarios.append(
             {
-                "dia": m.group(1),
+                "dia": _normalizar_dia(m.group(1)),
                 "hora_inicio": m.group(2),
                 "hora_fin": m.group(3),
                 "aula": _text(aula_span),

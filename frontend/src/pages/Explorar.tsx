@@ -116,6 +116,12 @@ export default function Explorar() {
     }
   }
 
+  async function quitar(grupo: Grupo) {
+    setMensaje(null)
+    await horarioStore.quitar(grupo.id)
+    setMiHorario((prev) => prev.filter((g) => g.id !== grupo.id))
+  }
+
   return (
     <div className="mx-auto w-full max-w-[1600px] px-6 py-12">
       <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">Explorar asignaturas</h1>
@@ -272,13 +278,22 @@ export default function Explorar() {
                           </p>
                         )}
                       </div>
-                      <button
-                        onClick={() => agregar(g)}
-                        disabled={agregado || !!conflicto}
-                        className="shrink-0 rounded-full bg-violet-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
-                      >
-                        {agregado ? "Ya agregado" : conflicto ? "Cruza horario" : "Agregar"}
-                      </button>
+                      {agregado ? (
+                        <button
+                          onClick={() => quitar(g)}
+                          className="shrink-0 rounded-full border border-red-300 px-4 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-500/40 dark:text-red-400 dark:hover:bg-red-500/10"
+                        >
+                          Quitar
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => agregar(g)}
+                          disabled={!!conflicto}
+                          className="shrink-0 rounded-full bg-violet-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 dark:disabled:bg-slate-700 dark:disabled:text-slate-400"
+                        >
+                          {conflicto ? "Cruza horario" : "Agregar"}
+                        </button>
+                      )}
                     </div>
                   </li>
                 )
