@@ -126,11 +126,39 @@ def crawl(sede_keys=None, nivel_keys=None):
                             )
                             # the page may be left in a broken state after an
                             # unexpected error -- reload and re-descend to
-                            # this facultad before trying the next plan.
-                            client.open()
-                            client.select_nivel(nivel_value)
-                            client.select_sede(sede_value)
-                            client.select_facultad(facultad_opt["value"])
+                            # this facultad before trying the next plan. This
+                            # recovery can itself hang/fail (a wedged page),
+                            # which used to propagate uncaught and kill the
+                            # whole multi-hour run -- retry once with a fresh
+                            # page, and if that also fails, give up on just
+                            # this facultad's remaining plans instead.
+                            try:
+                                client.open()
+                                client.select_nivel(nivel_value)
+                                client.select_sede(sede_value)
+                                client.select_facultad(facultad_opt["value"])
+                            except Exception:
+                                log.exception(
+                                    "  [%s/%s] FAILED to recover after plan %s, retrying with a fresh page",
+                                    sede_key, nivel_key, plan_opt["text"],
+                                )
+                                try:
+                                    page.close()
+                                except Exception:
+                                    pass
+                                page = browser.new_page()
+                                client = SiaClient(page)
+                                try:
+                                    client.open()
+                                    client.select_nivel(nivel_value)
+                                    client.select_sede(sede_value)
+                                    client.select_facultad(facultad_opt["value"])
+                                except Exception:
+                                    log.exception(
+                                        "  [%s/%s] FAILED AGAIN to recover, skipping the rest of facultad %s",
+                                        sede_key, nivel_key, facultad_opt["text"],
+                                    )
+                                    break
 
                 page.close()
 
