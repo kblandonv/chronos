@@ -1,22 +1,27 @@
 # Chronos
 
-Una aplicación web para ayudar a los estudiantes de la Universidad Nacional de
-Colombia, Sede Medellín, a armar su horario de clases.
+Una aplicación web para ayudar a los estudiantes de la Universidad Nacional
+de Colombia a armar su horario de clases.
+
+**La app está en línea: [chronosun.app](https://chronosun.app)** — no
+necesitas instalar nada para usarla.
 
 La universidad no expone una API pública para los datos de cursos/horarios,
 así que este proyecto incluye un scraper que los extrae del portal SIA
-(Catálogo de Asignaturas), cubriendo los tres niveles de estudio ofrecidos:
-Pregrado, Doctorado, y Postgrados y másteres.
+(Catálogo de Asignaturas), cubriendo las nueve sedes y los tres niveles de
+estudio que ofrece: Pregrado, Doctorado, y Postgrados y másteres.
 
 **Este es un proyecto de código abierto y se aceptan contribuciones.** Si
 quieres ayudar, revisa la sección [Contribuir](#contribuir) más abajo.
 
 ## Funcionalidades
 
-- **Explorar el catálogo**: nivel de estudio → facultad → plan de estudios →
-  asignaturas → grupos (horario, profesor, cupos).
+- **Explorar el catálogo**: sede → nivel de estudio → facultad → plan de
+  estudios → asignaturas → grupos (horario, aula, profesor, cupos), con
+  buscador por nombre.
 - **Armar tu horario**: agrega grupos y Chronos avisa si hay cruce de
-  horario con algo que ya tengas.
+  horario con algo que ya tengas, con una vista previa del calendario antes
+  de confirmar.
 - **Mi perfil**: guarda el/los plan(es) de estudio en los que estás
   (pregrado, posgrado, o ambos), distinguiendo el plan nuevo del viejo
   cuando el programa tiene los dos.
@@ -32,6 +37,8 @@ quieres ayudar, revisa la sección [Contribuir](#contribuir) más abajo.
 - **Backend**: FastAPI + PostgreSQL + Alembic
 - **Frontend**: React + Vite + TypeScript + Tailwind CSS + Auth0
 - **Scraper**: Python + Playwright
+- **Despliegue**: Render (backend) + Cloudflare (frontend) + Neon
+  (PostgreSQL) — todo en capas gratuitas.
 
 ## Estructura del proyecto
 
@@ -63,6 +70,20 @@ docker compose --profile scraper run --rm scraper
 El login usa Auth0 — necesitas tu propio tenant configurado (ver
 `CLAUDE.md` para los detalles de configuración si estás desarrollando
 localmente).
+
+## Tests
+
+```bash
+# backend
+cd backend && pytest
+
+# frontend
+cd frontend && npm run test
+```
+
+Son tests enfocados en la lógica más delicada: el parser de la historia
+académica y la detección de cruces de horario. El CI corre esto en cada
+push, junto con lint y build.
 
 ## Contribuir
 
