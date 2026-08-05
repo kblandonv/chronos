@@ -101,3 +101,38 @@ export function exportToICS(grupos: Grupo[]) {
   lineas.push("END:VCALENDAR")
   downloadBlob(lineas.join("\r\n"), "horario-chronos.ics", "text/calendar")
 }
+
+/** Google's "render" endpoint pre-fills its own event-creation form from
+ * URL params -- no OAuth/API needed, the user still has to click "Guardar"
+ * themselves. It only takes one event per URL, so a grupo meeting on
+ * several days opens one tab per day; all the window.open calls happen
+ * synchronously inside the click handler so browsers treat them as part of
+ * the same user gesture instead of blocking them as popups. */
+export function exportToGoogleCalendar(grupos: Grupo[]) {
+  for (const g of grupos) {
+    if (!g.fecha_inicio || !g.fecha_fin) continue
+    const inicio = new Date(`${g.fecha_inicio}T00:00:00`)
+    const fin = new Date(`${g.fecha_fin}T00:00:00`)
+
+    for (const h of g.horarios) {
+      const diaSemana = DIA_A_NUMERO[h.dia]
+      if (diaSemana == null) continue
+
+      const primerDia = primeraOcurrencia(inicio, diaSemana)
+      const [horaIni, minIni] = h.hora_inicio.split(":").map(Number)
+      const [horaFin, minFin] = h.hora_fin.split(":").map(Number)
+      const until = `${fin.getFullYear()}${pad(fin.getMonth() + 1)}${pad(fin.getDate())}T235959`
+
+      const params = new URLSearchParams({
+        action: "TEMPLATE",
+        text: `${g.asignatura_nombre ?? "Asignatura"} (Grupo ${g.numero})`,
+        dates: `${fechaICS(primerDia, horaIni, minIni)}/${fechaICS(primerDia, horaFin, minFin)}`,
+        details: `Profesor: ${g.profesor ?? "No informado"}\nCupos disponibles: ${g.cupos_disponibles ?? "?"}`,
+        recur: `RRULE:FREQ=WEEKLY;UNTIL=${until}`,
+      })
+      if (h.aula) params.set("location", h.aula)
+
+      window.open(`https://calendar.google.com/calendar/render?${params.toString()}`, "_blank")
+    }
+  }
+}

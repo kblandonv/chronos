@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useAuth0 } from "@auth0/auth0-react"
 import WeeklyCalendar from "../components/WeeklyCalendar"
-import { exportToExcel, exportToICS } from "../lib/exportHorario"
+import { exportToExcel, exportToGoogleCalendar, exportToICS } from "../lib/exportHorario"
 import { useHorarioStore } from "../lib/useHorarioStore"
 import { useIsMobile } from "../lib/useIsMobile"
 import { COLORES_GRUPO, type Grupo } from "../lib/types"
@@ -47,10 +47,16 @@ export default function Horario() {
               Exportar a Excel
             </button>
             <button
+              onClick={() => exportToGoogleCalendar(grupos)}
+              className="rounded-full border border-slate-300 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
+            >
+              Agregar a Google Calendar
+            </button>
+            <button
               onClick={() => exportToICS(grupos)}
               className="rounded-full border border-slate-300 px-4 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-900"
             >
-              Agregar a calendario
+              Descargar .ics
             </button>
           </div>
         )}
